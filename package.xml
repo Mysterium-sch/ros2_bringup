@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>ros2_bringup</name>
+  <version>0.1.0</version>
+  <description>ROS 2 package for launching camera, depth, and IMU nodes</description>
+  <maintainer email="lamblily90@gmail.com"></maintainer>
+  <author>Lilian Lamb</author>
+  <license>Apache License 2.0</license>
+
+  <!-- Dependencies -->
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>ament_cmake</build_depend>
+  <build_depend>ament_index_python</build_depend>
+  <build_depend>launch</build_depend>
+  <build_depend>launch_ros</build_depend>
+  
+  <exec_depend>ament_cmake</exec_depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>spinnaker_camera_driver</exec_depend>
+  <exec_depend>ms5837_bar_ros</exec_depend>
+  <exec_depend>microstrain_inertial_driver</exec_depend>
+ 
+
+  <!-- Exported packages -->
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
+
