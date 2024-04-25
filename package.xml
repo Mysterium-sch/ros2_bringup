@@ -13,7 +13,13 @@
   <build_depend>ament_index_python</build_depend>
   <build_depend>launch</build_depend>
   <build_depend>launch_ros</build_depend>
-  
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>cv2</build_depend>
+  <build_depend>cv_bridge</build_depend>
+
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>cv2</exec_depend>
   <exec_depend>ament_cmake</exec_depend>
   <exec_depend>ament_index_python</exec_depend>
   <exec_depend>launch</exec_depend>

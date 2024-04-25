@@ -5,6 +5,13 @@ find_package(ament_cmake REQUIRED)
 
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 
+ament_python_install_package(src)
+
+install(PROGRAMS 
+  src/debayer.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
