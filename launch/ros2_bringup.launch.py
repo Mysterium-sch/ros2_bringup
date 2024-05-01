@@ -19,7 +19,7 @@ def generate_launch_description():
 	      PythonLaunchDescriptionSource([os.path.join(
 		 get_package_share_directory('spinnaker_camera_driver'), 'launch'),
 		 '/driver_node.launch.py']),
-	          launch_arguments={'camera_type': camera_type, 'serial': serial}.items()
+	          launch_arguments={'camera_type': camera_type, 'serial': serial, 'computer_brightness': 'true'}.items()
     )
 		        
 	depth_dir = get_package_share_directory('ms5837_bar_ros')

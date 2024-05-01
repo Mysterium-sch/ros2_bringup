@@ -3,6 +3,7 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
 import cv2 as cv
+import numpy as np
 from cv_bridge import CvBridge
 
 class Debayer(Node):
@@ -17,10 +18,10 @@ class Debayer(Node):
     def im_callback(self, msg):
         data = msg
         img_in_cv2 = self.bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')
-        gray = cv.cvtColor(img_in_cv2, cv.COLOR_BayerRGGB2GRAY)
-        rgb = cv.cvtColor(img_in_cv2, cv.COLOR_BayerRGGB2BGR)
+        gray = cv.cvtColor(img_in_cv2, cv.COLOR_BayerRG2GRAY)
+        rgb = cv.cvtColor(img_in_cv2, cv.COLOR_BayerRG2RGB)
         gray_image = self.bridge.cv2_to_imgmsg(gray)
-        rgb_image = self.bridge.cv2_to_imgmsg(rgb)
+        rgb_image = self.bridge.cv2_to_imgmsg(rgb)   
         self.image_pub_grey.publish(gray_image)
         self.image_pub_rgb.publish(rgb_image)        
 
