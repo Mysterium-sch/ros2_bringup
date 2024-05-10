@@ -15,7 +15,7 @@ def generate_launch_description():
     included_cam_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             cam_dir, 'launch'), '/driver_node.launch.py']),
-        launch_arguments={'camera_type': camera_type, 'serial': serial, 'computer_brightness': computer_brightness}.items()
+        launch_arguments={'camera_type': camera_type, 'serial': serial}.items()
     )
         
     depth_dir = get_package_share_directory('ms5837_bar_ros')
