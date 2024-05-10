@@ -29,16 +29,15 @@ def generate_launch_description():
         PythonLaunchDescriptionSource([os.path.join(
             imu_dir, 'launch'), '/microstrain_launch.py'])
     )
-
-    if sonar == 'true':
-        sonar_dir = get_package_share_directory('imagenex831l_ros2')
-        included_sonar_launch = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([os.path.join(
-                sonar_dir, 'launch'), '/sonar.launch.py'])
-        )
-        nodes = [included_cam_launch, included_depth_launch, included_imu_launch, included_sonar_launch]
-    else:
-        nodes = [included_cam_launch, included_depth_launch, included_imu_launch]
+    
+    sonar_dir = get_package_share_directory('imagenex831l_ros2')
+    included_sonar_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            sonar_dir, 'launch'), '/sonar.launch.py']),
+        launch_arguments={'sonar': sonar}.items()
+    )
+   
+    nodes = [included_cam_launch, included_depth_launch, included_imu_launch, included_sonar_launch]
 
     return LaunchDescription(nodes)
 
