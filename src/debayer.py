@@ -10,8 +10,8 @@ class Debayer(Node):
     def __init__(self):
         super().__init__('debayer')
         self.bridge = CvBridge()
-        self.image_pub_grey = self.create_publisher(Image, 'debayer/image_raw/grey', 10)
-        self.image_pub_rgb = self.create_publisher(Image, 'debayer/image_raw/rgb', 10)
+        self.image_pub_grey = self.create_publisher(Image, '/debayer/image_raw/grey', 10)
+        self.image_pub_rgb = self.create_publisher(Image, '/debayer/image_raw/rgb', 10)
         self.image_sub = self.create_subscription(Image, '/flir_camera/image_raw', self.im_callback, 10)
         self.image_sub
 
@@ -20,8 +20,8 @@ class Debayer(Node):
         img_in_cv2 = self.bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')
         gray = cv.cvtColor(img_in_cv2, cv.COLOR_BayerRG2GRAY)
         rgb = cv.cvtColor(img_in_cv2, cv.COLOR_BayerRG2RGB)
-        gray_image = self.bridge.cv2_to_imgmsg(gray)
-        rgb_image = self.bridge.cv2_to_imgmsg(rgb)   
+        gray_image = self.bridge.cv2_to_imgmsg(gray, "mono8")
+        rgb_image = self.bridge.cv2_to_imgmsg(rgb, "rgb8")   
         self.image_pub_grey.publish(gray_image)
         self.image_pub_rgb.publish(rgb_image)        
 

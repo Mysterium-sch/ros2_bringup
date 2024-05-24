@@ -7,11 +7,13 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 
 def generate_launch_description():
-    cam_dir = get_package_share_directory('spinnaker_camera_driver')
+    
     camera_type = LaunchConfiguration('camera_type', default='blackfly_s')
     serial = LaunchConfiguration('serial', default="'20435009'")
     sonar = LaunchConfiguration('sonar', default='false')
+    cam_topic = LaunchConfiguration('cam_topic', default='/flir_camera/image_raw')
 
+    cam_dir = get_package_share_directory('spinnaker_camera_driver')
     included_cam_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             cam_dir, 'launch'), '/driver_node.launch.py']),
@@ -36,8 +38,23 @@ def generate_launch_description():
             sonar_dir, 'launch'), '/sonar.launch.py']),
         launch_arguments={'sonar': sonar}.items()
     )
+    
+    screen_dir = get_package_share_directory('custom_guyi')
+    included_sreen_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            screen_dir, 'launch'), '/gui.launch.py']),
+        launch_arguments={'cam_topic': cam_topic}.items()
+    )
+    
+    debayer_node = Node(
+        package='ros2_bringup',
+        executable='debayer.py',
+        name='debayer',
+        output='screen',
+        parameters=[{'cam_topic': cam_topic}]
+    )
    
-    nodes = [included_cam_launch, included_depth_launch, included_imu_launch, included_sonar_launch]
+    nodes = [included_cam_launch, included_depth_launch, included_imu_launch, included_sonar_launch, included_sreen_launch, debayer_node]
 
     return LaunchDescription(nodes)
 
