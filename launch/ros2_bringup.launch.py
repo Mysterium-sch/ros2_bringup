@@ -11,7 +11,7 @@ def generate_launch_description():
     camera_type = LaunchConfiguration('camera_type', default='blackfly_s')
     serial = LaunchConfiguration('serial', default="'20435009'")
     sonar = LaunchConfiguration('sonar', default='false')
-    cam_topic = LaunchConfiguration('cam_topic', default='/flir_camera/image_raw')
+    cam_topic = LaunchConfiguration('cam_topic', default='/debayer/image_raw/rgb')
 
     cam_dir = get_package_share_directory('spinnaker_camera_driver')
     included_cam_launch = IncludeLaunchDescription(
@@ -20,10 +20,23 @@ def generate_launch_description():
         launch_arguments={'camera_type': camera_type, 'serial': serial}.items()
     )
         
-    depth_dir = get_package_share_directory('ms5837_bar_ros')
-    included_depth_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            depth_dir, 'launch'), '/bar30.launch.py'])
+    #depth_dir = get_package_share_directory('ms5837_bar_ros')
+    #included_depth_launch = IncludeLaunchDescription(
+    #    PythonLaunchDescriptionSource([os.path.join(
+    #        depth_dir, 'launch'), '/bar30.launch.py'])
+    #)
+    ping1d_node = Node(
+        package='ms5837_bar_ros',
+        executable='bar30_node',
+        output="screen",
+    )
+
+    base_to_range = Node(
+        ## Configure the TF of the robot to the origin of the map coordinates
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        output='screen',
+        arguments=['0.0', '0.0', '0.0', '0', '0.0', '0.0', 'base_link', 'bar30_link']
     )
     
     imu_dir = get_package_share_directory('microstrain_inertial_driver')
@@ -54,7 +67,7 @@ def generate_launch_description():
         parameters=[{'cam_topic': cam_topic}]
     )
    
-    nodes = [included_cam_launch, included_depth_launch, included_imu_launch, included_sonar_launch, included_sreen_launch, debayer_node]
+    nodes = [included_cam_launch, ping1d_node, base_to_range, included_imu_launch, included_sonar_launch, included_sreen_launch, debayer_node]
 
     return LaunchDescription(nodes)
 
