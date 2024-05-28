@@ -23,10 +23,10 @@ def generate_launch_description():
     imu = LaunchConfiguration('imu', default="cv7")
 
     def get_params_file():
-        if LaunchConfigurationEquals(imu, "cv7"):
-            return _CV7_PARAMS_FILE
-        else:
+        if LaunchConfigurationEquals(imu, "empty"):
             return _EMPTY_PARAMS_FILE
+        else:
+            return _CV7_PARAMS_FILE
 
     cam_dir = get_package_share_directory('spinnaker_camera_driver')
     included_cam_launch = IncludeLaunchDescription(
