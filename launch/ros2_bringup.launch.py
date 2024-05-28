@@ -5,7 +5,7 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch.actions import IncludeLaunchDescription, ExecuteProcess
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, TextSubstitution
 
 def generate_launch_description():
     
@@ -74,11 +74,13 @@ def generate_launch_description():
         debayer_node
     ]
 
+    topic1 = ['/flir_camera/image_raw']
+    topic2 = ['/bar30/depth']
+    topic3 = ['/imagenex831l/range']
+    all_topics = topic1 + topic2 + topic3
+
     return LaunchDescription(
-        nodes + [
-            ExecuteProcess(
-                cmd=['ros2', 'bag', 'record', '-a'],
-                output='screen'
-            )
-        ]
-    )
+        nodes + [ExecuteProcess(
+            cmd = (['ros2', 'bag', 'record'] + all_topics + ['-odata/bag']),
+            output = 'screen' )
+    ])
