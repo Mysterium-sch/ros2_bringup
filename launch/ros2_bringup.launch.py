@@ -23,7 +23,7 @@ def generate_launch_description():
     imu = LaunchConfiguration('imu', default="cv7")
 
     def get_params_file():
-        if imu == 'cv7':
+        if imu == "cv7":
             return _CV7_PARAMS_FILE
         else:
             return _EMPTY_PARAMS_FILE
@@ -33,11 +33,6 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(cam_dir, 'launch', 'driver_node.launch.py')),
         launch_arguments={'camera_type': camera_type, 'serial': serial}.items()
     )
-        
-    #depth_dir = get_package_share_directory('ms5837_bar_ros')
-    #included_depth_launch = IncludeLaunchDescription(
-    #    PythonLaunchDescriptionSource(os.path.join(depth_dir, 'launch', 'bar30.launch.py'))
-    #)
 
     #Depth 
     ping1d_node = Node(
