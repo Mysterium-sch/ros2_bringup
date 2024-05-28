@@ -12,6 +12,7 @@ def generate_launch_description():
     serial = LaunchConfiguration('serial', default="'20435009'")
     sonar = LaunchConfiguration('sonar', default='false')
     cam_topic = LaunchConfiguration('cam_topic', default='/debayer/image_raw/rgb')
+    device = LaunchConfiguration('cam_topic', default='')
 
     cam_dir = get_package_share_directory('spinnaker_camera_driver')
     included_cam_launch = IncludeLaunchDescription(
@@ -49,14 +50,14 @@ def generate_launch_description():
     included_sonar_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             sonar_dir, 'launch'), '/sonar.launch.py']),
-        launch_arguments={'sonar': sonar}.items()
+        launch_arguments={'sonar': sonar, 'device' : device}.items()
     )
     
     screen_dir = get_package_share_directory('custom_guyi')
     included_sreen_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             screen_dir, 'launch'), '/gui.launch.py']),
-        launch_arguments={'cam_topic': cam_topic}.items()
+        launch_arguments={'cam_topic': cam_topic, 'device' : device}.items()
     )
     
     debayer_node = Node(
@@ -64,7 +65,7 @@ def generate_launch_description():
         executable='debayer.py',
         name='debayer',
         output='screen',
-        parameters=[{'cam_topic': cam_topic}]
+        parameters=[{'cam_topic': cam_topic, 'device' : device}]
     )
    
     nodes = [included_cam_launch, ping1d_node, base_to_range, included_imu_launch, included_sonar_launch, included_sreen_launch, debayer_node]
