@@ -10,7 +10,7 @@ class Debayer(Node):
     def __init__(self):
         super().__init__('debayer')
         self.bridge = CvBridge()
-        self.declare_parameter("device", rclpy.Parameter.Type.String)
+        self.declare_parameter("device", "")
         device = self.get_parameter('device').value
         self.image_pub_grey = self.create_publisher(Image, f'{device}/debayer/image_raw/grey', 10)
         self.image_pub_rgb = self.create_publisher(Image, f'{device}/debayer/image_raw/rgb', 10)

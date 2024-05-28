@@ -1,8 +1,9 @@
 import os
+import launch
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, ExecuteProcess
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 
@@ -12,20 +13,19 @@ def generate_launch_description():
     serial = LaunchConfiguration('serial', default="'20435009'")
     sonar = LaunchConfiguration('sonar', default='false')
     cam_topic = LaunchConfiguration('cam_topic', default='/debayer/image_raw/rgb')
-    device = LaunchConfiguration('cam_topic', default='')
+    device = LaunchConfiguration('device', default="")
 
     cam_dir = get_package_share_directory('spinnaker_camera_driver')
     included_cam_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            cam_dir, 'launch'), '/driver_node.launch.py']),
+        PythonLaunchDescriptionSource(os.path.join(cam_dir, 'launch', 'driver_node.launch.py')),
         launch_arguments={'camera_type': camera_type, 'serial': serial}.items()
     )
         
     #depth_dir = get_package_share_directory('ms5837_bar_ros')
     #included_depth_launch = IncludeLaunchDescription(
-    #    PythonLaunchDescriptionSource([os.path.join(
-    #        depth_dir, 'launch'), '/bar30.launch.py'])
+    #    PythonLaunchDescriptionSource(os.path.join(depth_dir, 'launch', 'bar30.launch.py'))
     #)
+    
     ping1d_node = Node(
         package='ms5837_bar_ros',
         executable='bar30_node',
@@ -33,7 +33,6 @@ def generate_launch_description():
     )
 
     base_to_range = Node(
-        ## Configure the TF of the robot to the origin of the map coordinates
         package='tf2_ros',
         executable='static_transform_publisher',
         output='screen',
@@ -42,22 +41,19 @@ def generate_launch_description():
     
     imu_dir = get_package_share_directory('microstrain_inertial_driver')
     included_imu_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            imu_dir, 'launch'), '/microstrain_launch.py'])
+        PythonLaunchDescriptionSource(os.path.join(imu_dir, 'launch', 'microstrain_launch.py'))
     )
     
     sonar_dir = get_package_share_directory('imagenex831l_ros2')
     included_sonar_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            sonar_dir, 'launch'), '/sonar.launch.py']),
-        launch_arguments={'sonar': sonar, 'device' : device}.items()
+        PythonLaunchDescriptionSource(os.path.join(sonar_dir, 'launch', 'sonar.launch.py')),
+        launch_arguments={'sonar': sonar, 'device': device}.items()
     )
     
     screen_dir = get_package_share_directory('custom_guyi')
-    included_sreen_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            screen_dir, 'launch'), '/gui.launch.py']),
-        launch_arguments={'cam_topic': cam_topic, 'device' : device}.items()
+    included_screen_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(screen_dir, 'launch', 'gui.launch.py')),
+        launch_arguments={'cam_topic': cam_topic, 'device': device}.items()
     )
     
     debayer_node = Node(
@@ -65,12 +61,24 @@ def generate_launch_description():
         executable='debayer.py',
         name='debayer',
         output='screen',
-        parameters=[{'cam_topic': cam_topic, 'device' : device}]
+        parameters=[{'cam_topic': cam_topic, 'device': device}]
     )
    
-    nodes = [included_cam_launch, ping1d_node, base_to_range, included_imu_launch, included_sonar_launch, included_sreen_launch, debayer_node]
+    nodes = [
+        included_cam_launch,
+        ping1d_node,
+        base_to_range,
+        included_imu_launch,
+        included_sonar_launch,
+        included_screen_launch,
+        debayer_node
+    ]
 
-    return LaunchDescription(nodes)
-
-
-
+    return LaunchDescription(
+        nodes + [
+            ExecuteProcess(
+                cmd=['ros2', 'bag', 'record', '-a'],
+                output='screen'
+            )
+        ]
+    )
