@@ -23,7 +23,7 @@ def generate_launch_description():
     imu = LaunchConfiguration('imu', default="cv7")
 
     def get_params_file():
-        if imu == "cv7":
+        if LaunchConfigurationEquals(imu, "cv7"):
             return _CV7_PARAMS_FILE
         else:
             return _EMPTY_PARAMS_FILE
