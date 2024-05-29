@@ -88,7 +88,7 @@ def generate_launch_description():
         debayer_node
     ]
 
-    topic1 = ['/flir_camera/image_raw']
+    topic1 = ['/image/compressed']
     topic2 = ['/bar30/depth']
     topic3 = ['/bar30/pressure']
     topic4 = ['/bar30/temperature']
