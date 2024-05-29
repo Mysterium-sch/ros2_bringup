@@ -98,6 +98,6 @@ def generate_launch_description():
 
     return LaunchDescription(
         nodes + [ExecuteProcess(
-            cmd = (['ros2', 'bag', 'record'] + all_topics + ['-odata/bag']),
+            cmd = (['ros2', 'bag', 'record'] + all_topics),
             output = 'screen' )
     ])
