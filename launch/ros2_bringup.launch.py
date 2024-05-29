@@ -11,7 +11,7 @@ from launch.conditions import LaunchConfigurationEquals, IfCondition
 
 def generate_launch_description():
 
-    _MICROSTRAIN_LAUNCH_FILE = os.path.join(ament_index_python.packages.get_package_share_directory('microstrain_inertial_driver'), 'launch', 'microstrain_launch.py')
+    _MICROSTRAIN_LAUNCH_FILE = os.path.join(ament_index_python.packages.get_package_share_directory('microstrain_inertial_examples'), 'launch', 'cv7_launch.py')
     _CV7_PARAMS_FILE = os.path.join(ament_index_python.packages.get_package_share_directory('microstrain_inertial_examples'), 'config', 'cv7', 'cv7.yml')
     _EMPTY_PARAMS_FILE = os.path.join(get_package_share_directory('microstrain_inertial_driver'),'config','empty.yml')
 
@@ -50,12 +50,12 @@ def generate_launch_description():
 
     included_imu_launch = IncludeLaunchDescription(
       PythonLaunchDescriptionSource(_MICROSTRAIN_LAUNCH_FILE),
-      launch_arguments={
-        'configure': 'true',
-        'activate': 'true',
-        'params_file': get_params_file(),
-        'namespace': '/',
-      }.items(),
+     # launch_arguments={
+     #   'configure': 'true',
+     #   'activate': 'true',
+     #   'params_file': get_params_file(),
+     #   'namespace': '/',
+     # }.items(),
     )
     
     sonar_dir = get_package_share_directory('imagenex831l_ros2')
