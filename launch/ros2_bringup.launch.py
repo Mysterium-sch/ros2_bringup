@@ -20,13 +20,12 @@ def generate_launch_description():
     sonar = LaunchConfiguration('sonar', default='false')
     cam_topic = LaunchConfiguration('cam_topic', default='/debayer/image_raw/rgb')
     device = LaunchConfiguration('device', default="")
-    imu = LaunchConfiguration('imu', default="cv7")
 
-    def get_params_file():
-        if LaunchConfigurationEquals(imu, "empty"):
-            return _EMPTY_PARAMS_FILE
+    def get_image():
+        if LaunchConfigurationEquals(device, "jetson_1"):
+            return ['jetson_1/image/compressed']
         else:
-            return _CV7_PARAMS_FILE
+            return ['jetson_2/image/compressed']
 
     cam_dir = get_package_share_directory('spinnaker_camera_driver')
     included_cam_launch = IncludeLaunchDescription(
@@ -88,7 +87,7 @@ def generate_launch_description():
         debayer_node
     ]
 
-    topic1 = ['/image/compressed']
+    #topic1 = ['/image/compressed']
     topic2 = ['/bar30/depth']
     topic3 = ['/bar30/pressure']
     topic4 = ['/bar30/temperature']
@@ -96,7 +95,7 @@ def generate_launch_description():
     topic6 = ['/imu/data']
     topic7 = ['/ekf/status']
 
-    all_topics = topic1 + topic2 + topic3 + topic4 + topic5 + topic6 + topic7
+    all_topics = get_image() + topic2 + topic3 + topic4 + topic5 + topic6 + topic7
 
     return LaunchDescription(
         nodes + [ExecuteProcess(
