@@ -90,11 +90,13 @@ def generate_launch_description():
 
     topic1 = ['/flir_camera/image_raw']
     topic2 = ['/bar30/depth']
-    topic3 = ['/imagenex831l/range']
-    topic4 = ['/imu/data']
-    topic5 = ['/ekf/status']
+    topic3 = ['/bar30/pressure']
+    topic4 = ['/bar30/temperature']
+    topic5 = ['/imagenex831l/range']
+    topic6 = ['/imu/data']
+    topic7 = ['/ekf/status']
 
-    all_topics = topic1 + topic2 + topic3 + topic4 + topic5
+    all_topics = topic1 + topic2 + topic3 + topic4 + topic5 + topic6 + topic7
 
     return LaunchDescription(
         nodes + [ExecuteProcess(
