@@ -3,7 +3,7 @@ import launch
 import ament_index_python
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch_ros.actions import Node, PushRosNamespace
+from launch_ros.actions import Node, SetLaunchConfiguration
 from launch.actions import IncludeLaunchDescription, ExecuteProcess, GroupAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
@@ -12,11 +12,11 @@ from launch.conditions import LaunchConfigurationEquals, IfCondition
 def generate_launch_description():
 
     _MICROSTRAIN_LAUNCH_FILE = os.path.join(
-        ament_index_python.packages.get_package_share_directory('microstrain_inertial_examples'),
+        get_package_share_directory('microstrain_inertial_examples'),
         'launch', 'cv7_launch.py'
     )
     _CV7_PARAMS_FILE = os.path.join(
-        ament_index_python.packages.get_package_share_directory('microstrain_inertial_examples'),
+        get_package_share_directory('microstrain_inertial_examples'),
         'config', 'cv7', 'cv7.yml'
     )
     _EMPTY_PARAMS_FILE = os.path.join(
@@ -25,16 +25,13 @@ def generate_launch_description():
     )
 
     camera_type = LaunchConfiguration('camera_type', default='blackfly_s')
-    serial = LaunchConfiguration('serial', default="'20435009'")
+    serial = LaunchConfiguration('serial', default='20435009')
     sonar = LaunchConfiguration('sonar', default='false')
     cam_topic = LaunchConfiguration('cam_topic', default='/debayer/image_raw/rgb')
-    device = LaunchConfiguration('device', default="")
+    device = LaunchConfiguration('device', default='')
 
     def get_image():
-        if LaunchConfigurationEquals(device, "jetson_2"):
-            return ['jetson_2/image/compressed']
-        else:
-            return ['jetson_1/image/compressed']
+        return ['jetson_2/image/compressed'] if device == 'jetson_2' else ['jetson_1/image/compressed']
 
     cam_dir = get_package_share_directory('spinnaker_camera_driver')
     included_cam_launch = IncludeLaunchDescription(
@@ -43,7 +40,7 @@ def generate_launch_description():
     )
     included_cam_launch_with_namespace = GroupAction(
         actions=[
-            PushRosNamespace('jetson_1'),
+            SetLaunchConfiguration('namespace', 'jetson_1'),
             included_cam_launch
         ]
     )
@@ -56,7 +53,7 @@ def generate_launch_description():
     )
     ping1d_node_with_namespace = GroupAction(
         actions=[
-            PushRosNamespace('jetson_1'),
+            SetLaunchConfiguration('namespace', 'jetson_1'),
             ping1d_node
         ]
     )
@@ -69,7 +66,7 @@ def generate_launch_description():
     )
     base_to_range_with_namespace = GroupAction(
         actions=[
-            PushRosNamespace('jetson_1'),
+            SetLaunchConfiguration('namespace', 'jetson_1'),
             base_to_range
         ]
     )
@@ -80,7 +77,7 @@ def generate_launch_description():
     )
     included_imu_launch_with_namespace = GroupAction(
         actions=[
-            PushRosNamespace('jetson_1'),
+            SetLaunchConfiguration('namespace', 'jetson_1'),
             included_imu_launch
         ]
     )
@@ -115,21 +112,23 @@ def generate_launch_description():
         debayer_node
     ]
 
-    topic1 = ['/jetson_1/image/compressed']
-    topic2 = ['/jetson_1/bar30/depth']
-    topic3 = ['/jetson_1/bar30/pressure']
-    topic4 = ['/jetson_1/bar30/temperature']
-    topic5 = ['/imagenex831l/range']
-    topic6 = ['/jetson_1/imu/data']
-    topic7 = ['/jetson_1/ekf/status']
-    topic8 = ['/imagenex831l/range_raw']
-
-    all_topics = topic1 + topic2 + topic3 + topic4 + topic5 + topic6 + topic7 + topic8
+    topics = [
+        '/jetson_1/image/compressed',
+        '/jetson_1/bar30/depth',
+        '/jetson_1/bar30/pressure',
+        '/jetson_1/bar30/temperature',
+        '/imagenex831l/range',
+        '/jetson_1/imu/data',
+        '/jetson_1/ekf/status',
+        '/imagenex831l/range_raw'
+    ]
 
     return LaunchDescription(
-        nodes + [ExecuteProcess(
-            cmd = (['ros2', 'bag', 'record'] + all_topics),
-            output = 'screen'
-        )]
+        nodes + [
+            ExecuteProcess(
+                cmd=['ros2', 'bag', 'record'] + topics,
+                output='screen'
+            )
+        ]
     )
 
