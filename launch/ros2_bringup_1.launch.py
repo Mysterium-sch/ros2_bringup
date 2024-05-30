@@ -75,7 +75,8 @@ def generate_launch_description():
     )
 
     included_imu_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(_MICROSTRAIN_LAUNCH_FILE)
+        PythonLaunchDescriptionSource(_MICROSTRAIN_LAUNCH_FILE),
+        launch_arguments={'namespace': 'jetson_1'}.items()
     )
     included_imu_launch_with_namespace = GroupAction(
         actions=[

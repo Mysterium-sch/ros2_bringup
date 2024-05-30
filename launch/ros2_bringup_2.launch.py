@@ -1,22 +1,20 @@
 import os
-import launch
-import ament_index_python
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node, PushRosNamespace
 from launch.actions import IncludeLaunchDescription, ExecuteProcess, GroupAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
-from launch.conditions import LaunchConfigurationEquals, IfCondition
+from launch.conditions import LaunchConfigurationEquals
 
 def generate_launch_description():
 
     _MICROSTRAIN_LAUNCH_FILE = os.path.join(
-        ament_index_python.packages.get_package_share_directory('microstrain_inertial_examples'),
+        get_package_share_directory('microstrain_inertial_examples'),
         'launch', 'cv7_launch.py'
     )
     _CV7_PARAMS_FILE = os.path.join(
-        ament_index_python.packages.get_package_share_directory('microstrain_inertial_examples'),
+        get_package_share_directory('microstrain_inertial_examples'),
         'config', 'cv7', 'cv7.yml'
     )
     _EMPTY_PARAMS_FILE = os.path.join(
@@ -48,34 +46,22 @@ def generate_launch_description():
         ]
     )
 
-    # Depth 
     ping1d_node = Node(
         package='ms5837_bar_ros',
         executable='bar30_node',
         output="screen"
-    )
-    ping1d_node_with_namespace = GroupAction(
-        actions=[
-            PushRosNamespace('jetson_2'),
-            ping1d_node
-        ]
     )
 
     base_to_range = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         output='screen',
-        arguments=['0.0', '0.0', '0.0', '0', '0.0', '0.0', 'base_link', 'bar30_link']
-    )
-    base_to_range_with_namespace = GroupAction(
-        actions=[
-            PushRosNamespace('jetson_2'),
-            base_to_range
-        ]
+        arguments=['0.0', '0.0', '0.0', '0', '0.0', '0.0', 'base_link', 'bar30_link'],
     )
 
     included_imu_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(_MICROSTRAIN_LAUNCH_FILE)
+        PythonLaunchDescriptionSource(_MICROSTRAIN_LAUNCH_FILE),
+        launch_arguments={'namespace': 'jetson_2'}.items()
     )
     included_imu_launch_with_namespace = GroupAction(
         actions=[
@@ -89,13 +75,13 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(sonar_dir, 'launch', 'sonar.launch.py')),
         launch_arguments={'sonar': sonar, 'device': device}.items()
     )
-    
+
     screen_dir = get_package_share_directory('custom_guyi')
     included_screen_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(screen_dir, 'launch', 'gui.launch.py')),
         launch_arguments={'cam_topic': cam_topic, 'device': device}.items()
     )
-    
+
     debayer_node = Node(
         package='ros2_bringup',
         executable='debayer.py',
@@ -106,8 +92,8 @@ def generate_launch_description():
 
     nodes = [
         included_cam_launch_with_namespace,
-        ping1d_node_with_namespace,
-        base_to_range_with_namespace,
+        ping1d_node,
+        base_to_range,
         included_imu_launch_with_namespace,
         included_sonar_launch,
         included_screen_launch,
@@ -127,8 +113,8 @@ def generate_launch_description():
 
     return LaunchDescription(
         nodes + [ExecuteProcess(
-            cmd = (['ros2', 'bag', 'record'] + all_topics),
-            output = 'screen'
+            cmd=['ros2', 'bag', 'record'] + all_topics,
+            output='screen'
         )]
     )
 
