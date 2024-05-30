@@ -14,7 +14,7 @@ class Debayer(Node):
         device = self.get_parameter('device').value
         self.image_pub_grey = self.create_publisher(Image, f'{device}/debayer/image_raw/grey', 10)
         self.image_pub_rgb = self.create_publisher(Image, f'{device}/debayer/image_raw/rgb', 10)
-        self.image_sub = self.create_subscription(Image, f'/flir_camera/image_raw', self.im_callback, 10)
+        self.image_sub = self.create_subscription(Image, f'{device}/flir_camera/image_raw', self.im_callback, 10)
         self.image_com = self.create_publisher(CompressedImage, f'{device}/image/compressed', 10)
 	
         self.image_sub

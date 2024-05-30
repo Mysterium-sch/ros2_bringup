@@ -27,17 +27,25 @@ def generate_launch_description():
         else:
             return ['jetson_2/image/compressed']
 
-    cam_dir = get_package_share_directory('spinnaker_camera_driver')
-    included_cam_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(cam_dir, 'launch', 'driver_node.launch.py')),
-        launch_arguments={'camera_type': camera_type, 'serial': serial}.items()
-    )
+included_cam_launch = IncludeLaunchDescription(
+    PythonLaunchDescriptionSource(os.path.join(cam_dir, 'launch', 'driver_node.launch.py')),
+    launch_arguments={'camera_type': camera_type, 'serial': serial}.items(),
+    remappings=[
+        ('/image_raw', '/jetson_2/image_raw'),
+        ('/camera_info', '/jetson_2/camera_info')
+    ]
+)
 
     #Depth 
     ping1d_node = Node(
         package='ms5837_bar_ros',
         executable='bar30_node',
-        output="screen"
+        output="screen",
+        remappings=[
+        ('/bar30/depth', '/jetson_2/bar30/depth'),
+        ('/bar30/pressure', '/jetson_2/bar30/pressure'),
+        ('/bar30/temperature', '/jetson_2/bar30/temperature')
+    ]
     )
 
     base_to_range = Node(
@@ -49,12 +57,10 @@ def generate_launch_description():
 
     included_imu_launch = IncludeLaunchDescription(
       PythonLaunchDescriptionSource(_MICROSTRAIN_LAUNCH_FILE),
-     # launch_arguments={
-     #   'configure': 'true',
-     #   'activate': 'true',
-     #   'params_file': get_params_file(),
-     #   'namespace': '/',
-     # }.items(),
+         remappings=[
+        ('/imu/data', '/jetson_2/imu/data'),
+        ('/ekf/status', '/jetson_2/ekf/status')
+    ]
     )
     
     sonar_dir = get_package_share_directory('imagenex831l_ros2')
@@ -88,12 +94,12 @@ def generate_launch_description():
     ]
 
     topic1 = ['/jetson_2/image/compressed']
-    topic2 = ['/bar30/depth']
-    topic3 = ['/bar30/pressure']
-    topic4 = ['/bar30/temperature']
+    topic2 = ['/jetson_2/bar30/depth']
+    topic3 = ['/jetson_2/bar30/pressure']
+    topic4 = ['/jetson_2/bar30/temperature']
     topic5 = ['/imagenex831l/range']
-    topic6 = ['/imu/data']
-    topic7 = ['/ekf/status']
+    topic6 = ['/jetson_2/imu/data']
+    topic7 = ['/jetson_2/ekf/status']
     topic8 = ['/imagenex831l/range_raw']
 
     all_topics = topic1 + topic2 + topic3 + topic4 + topic5 + topic6 + topic7 + topic8
