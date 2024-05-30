@@ -94,8 +94,9 @@ def generate_launch_description():
     topic5 = ['/imagenex831l/range']
     topic6 = ['/imu/data']
     topic7 = ['/ekf/status']
+    topic8 = ['/imagenex831l/range_raw']
 
-    all_topics = get_image() + topic2 + topic3 + topic4 + topic5 + topic6 + topic7
+    all_topics = get_image() + topic2 + topic3 + topic4 + topic5 + topic6 + topic7 + topic8
 
     return LaunchDescription(
         nodes + [ExecuteProcess(
