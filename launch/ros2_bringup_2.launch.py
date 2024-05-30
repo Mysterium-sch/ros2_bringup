@@ -1,7 +1,7 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch_ros.actions import Node, PushRosNamespace
+from launch_ros.actions import Node, SetLaunchConfiguration
 from launch.actions import IncludeLaunchDescription, ExecuteProcess, GroupAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
@@ -23,16 +23,13 @@ def generate_launch_description():
     )
 
     camera_type = LaunchConfiguration('camera_type', default='blackfly_s')
-    serial = LaunchConfiguration('serial', default="'20435009'")
+    serial = LaunchConfiguration('serial', default='20435009')
     sonar = LaunchConfiguration('sonar', default='false')
     cam_topic = LaunchConfiguration('cam_topic', default='/debayer/image_raw/rgb')
     device = LaunchConfiguration('device', default="")
 
     def get_image():
-        if LaunchConfigurationEquals(device, "jetson_1"):
-            return ['jetson_1/image/compressed']
-        else:
-            return ['jetson_2/image/compressed']
+        return ['jetson_1/image/compressed'] if device == 'jetson_1' else ['jetson_2/image/compressed']
 
     cam_dir = get_package_share_directory('spinnaker_camera_driver')
     included_cam_launch = IncludeLaunchDescription(
@@ -41,7 +38,7 @@ def generate_launch_description():
     )
     included_cam_launch_with_namespace = GroupAction(
         actions=[
-            PushRosNamespace('jetson_2'),
+            SetLaunchConfiguration('namespace', 'jetson_2'),
             included_cam_launch
         ]
     )
@@ -65,7 +62,7 @@ def generate_launch_description():
     )
     included_imu_launch_with_namespace = GroupAction(
         actions=[
-            PushRosNamespace('jetson_2'),
+            SetLaunchConfiguration('namespace', 'jetson_2'),
             included_imu_launch
         ]
     )
@@ -100,21 +97,23 @@ def generate_launch_description():
         debayer_node
     ]
 
-    topic1 = ['/jetson_2/image/compressed']
-    topic2 = ['/jetson_2/bar30/depth']
-    topic3 = ['/jetson_2/bar30/pressure']
-    topic4 = ['/jetson_2/bar30/temperature']
-    topic5 = ['/jetson_2/imagenex831l/range']
-    topic6 = ['/jetson_2/imu/data']
-    topic7 = ['/jetson_2/ekf/status']
-    topic8 = ['/jetson_2/imagenex831l/range_raw']
-
-    all_topics = topic1 + topic2 + topic3 + topic4 + topic5 + topic6 + topic7 + topic8
+    topics = [
+        '/jetson_2/image/compressed',
+        '/jetson_2/bar30/depth',
+        '/jetson_2/bar30/pressure',
+        '/jetson_2/bar30/temperature',
+        '/imagenex831l/range',
+        '/jetson_2/imu/data',
+        '/jetson_2/ekf/status',
+        '/imagenex831l/range_raw'
+    ]
 
     return LaunchDescription(
-        nodes + [ExecuteProcess(
-            cmd=['ros2', 'bag', 'record'] + all_topics,
-            output='screen'
-        )]
+        nodes + [
+            ExecuteProcess(
+                cmd=['ros2', 'bag', 'record'] + topics,
+                output='screen'
+            )
+        ]
     )
 
