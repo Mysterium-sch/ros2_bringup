@@ -29,12 +29,17 @@ class SimpleBagRecorder(Node):
         sonar_topic_rr = self.get_parameter('sonar_topic_rr').get_parameter_value().string_value
         imu_topic = self.get_parameter('imu_topic').get_parameter_value().string_value
 
+        self.get_logger().info(f"Cam topic: {cam_topic}")
+        self.get_logger().info(f"Depth topics: {depth_topic_d}, {depth_topic_p}, {depth_topic_t}")
+        self.get_logger().info(f"Sonar topics: {sonar_topic_pr}, {sonar_topic_rr}")
+        self.get_logger().info(f"IMU topic: {imu_topic}")
+
         self.writer = rosbag2_py.SequentialWriter()
 
-        storage_options = rosbag2_py._storage.StorageOptions(
+        storage_options = rosbag2_py.StorageOptions(
             uri='my_bag',
             storage_id='sqlite3')
-        converter_options = rosbag2_py._storage.ConverterOptions('', '')
+        converter_options = rosbag2_py.ConverterOptions('', '')
         self.writer.open(storage_options, converter_options)
 
         # Create topics metadata
@@ -49,7 +54,7 @@ class SimpleBagRecorder(Node):
         ]
 
         for topic_name, topic_type in topics:
-            topic_info = rosbag2_py._storage.TopicMetadata(
+            topic_info = rosbag2_py.TopicMetadata(
                 name=topic_name,
                 type=topic_type,
                 serialization_format='cdr')
@@ -96,6 +101,7 @@ class SimpleBagRecorder(Node):
             10)
 
     def topic_callback(self, topic_name, msg):
+        self.get_logger().info(f"Received message on topic: {topic_name}")
         self.writer.write(
             topic_name,
             serialize_message(msg),
