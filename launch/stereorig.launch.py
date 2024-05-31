@@ -48,6 +48,7 @@ def generate_launch_description():
     ping1d_node = Node(
         package='ms5837_bar_ros',
         executable='bar30_node',
+        namespace=namespace,
         output="screen"
     )
 
@@ -56,6 +57,7 @@ def generate_launch_description():
         package='tf2_ros',
         executable='static_transform_publisher',
         output='screen',
+        namespace=namespace,
         arguments=['0.0', '0.0', '0.0', '0', '0.0', '0.0', 'base_link', 'bar30_link']
     )
 
@@ -95,6 +97,7 @@ def generate_launch_description():
         package='ros2_bringup',
         executable='debayer.py',
         name='debayer',
+        namespace=namespace,
         output='screen',
         parameters=[{'cam_topic': cam_topic, 'device': namespace}]
     )
