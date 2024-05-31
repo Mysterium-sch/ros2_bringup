@@ -1,15 +1,25 @@
 import os
 import launch
-import ament_index_python
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch_ros.actions import Node
-from launch.actions import IncludeLaunchDescription, ExecuteProcess, GroupAction, SetLaunchConfiguration
+from launch_ros.actions import Node, PushRosNamespace
+from launch.actions import IncludeLaunchDescription, ExecuteProcess, OpaqueFunction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
-from launch.conditions import LaunchConfigurationEquals, IfCondition
+
+def ensure_required_arguments(context, *args, **kwargs):
+    required_args = ['namespace', 'camera_type', 'serial', 'sonar', 'cam_topic']
+    for arg in required_args:
+        if not context.launch_configurations.get(arg):
+            raise RuntimeError(f"The '{arg}' argument is required.")
+    return []
 
 def generate_launch_description():
+    namespace = LaunchConfiguration('namespace')
+    camera_type = LaunchConfiguration('camera_type')
+    serial = LaunchConfiguration('serial')
+    sonar = LaunchConfiguration('sonar')
+    cam_topic = LaunchConfiguration('cam_topic')
 
     _MICROSTRAIN_LAUNCH_FILE = os.path.join(
         get_package_share_directory('microstrain_inertial_examples'),
@@ -24,74 +34,41 @@ def generate_launch_description():
         'config', 'empty.yml'
     )
 
-    camera_type = LaunchConfiguration('camera_type', default='blackfly_s')
-    serial = LaunchConfiguration('serial', default='20435009')
-    sonar = LaunchConfiguration('sonar', default='false')
-    cam_topic = LaunchConfiguration('cam_topic', default='/debayer/image_raw/rgb')
-    device = LaunchConfiguration('device', default='')
-
-    def get_image():
-        return ['jetson_2/image/compressed'] if device == 'jetson_2' else ['jetson_1/image/compressed']
-
     cam_dir = get_package_share_directory('spinnaker_camera_driver')
     included_cam_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(cam_dir, 'launch', 'driver_node.launch.py')),
         launch_arguments={'camera_type': camera_type, 'serial': serial}.items()
     )
-    included_cam_launch_with_namespace = GroupAction(
-        actions=[
-            SetLaunchConfiguration('namespace', 'jetson_1'),
-            included_cam_launch
-        ]
-    )
 
-    # Depth 
     ping1d_node = Node(
         package='ms5837_bar_ros',
         executable='bar30_node',
         output="screen"
     )
-    ping1d_node_with_namespace = GroupAction(
-        actions=[
-            SetLaunchConfiguration('namespace', 'jetson_1'),
-            ping1d_node
-        ]
-    )
 
+    # TODO: Fix Me
     base_to_range = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         output='screen',
         arguments=['0.0', '0.0', '0.0', '0', '0.0', '0.0', 'base_link', 'bar30_link']
     )
-    base_to_range_with_namespace = GroupAction(
-        actions=[
-            SetLaunchConfiguration('namespace', 'jetson_1'),
-            base_to_range
-        ]
-    )
 
     included_imu_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(_MICROSTRAIN_LAUNCH_FILE),
-        launch_arguments={'namespace': 'jetson_1'}.items()
-    )
-    included_imu_launch_with_namespace = GroupAction(
-        actions=[
-            SetLaunchConfiguration('namespace', 'jetson_1'),
-            included_imu_launch
-        ]
+        launch_arguments={'namespace': namespace}.items()
     )
 
     sonar_dir = get_package_share_directory('imagenex831l_ros2')
     included_sonar_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(sonar_dir, 'launch', 'sonar.launch.py')),
-        launch_arguments={'sonar': sonar, 'device': device}.items()
+        launch_arguments={'sonar': sonar, 'device': namespace}.items()
     )
     
     screen_dir = get_package_share_directory('custom_guyi')
     included_screen_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(screen_dir, 'launch', 'gui.launch.py')),
-        launch_arguments={'cam_topic': cam_topic, 'device': device}.items()
+        launch_arguments={'cam_topic': cam_topic, 'device': namespace}.items()
     )
     
     debayer_node = Node(
@@ -99,36 +76,39 @@ def generate_launch_description():
         executable='debayer.py',
         name='debayer',
         output='screen',
-        parameters=[{'cam_topic': cam_topic, 'device': device}]
+        parameters=[{'cam_topic': cam_topic, 'device': namespace}]
     )
 
     nodes = [
-        included_cam_launch_with_namespace,
-        ping1d_node_with_namespace,
-        base_to_range_with_namespace,
-        included_imu_launch_with_namespace,
+        included_cam_launch,
+        ping1d_node,
+        base_to_range,
+        included_imu_launch,
         included_sonar_launch,
         included_screen_launch,
         debayer_node
     ]
 
+    # This list should be in a params file
     topics = [
-        '/jetson_1/image/compressed',
-        '/jetson_1/bar30/depth',
-        '/jetson_1/bar30/pressure',
-        '/jetson_1/bar30/temperature',
+        '/image/compressed',
+        '/bar30/depth',
+        '/bar30/pressure',
+        '/bar30/temperature',
         '/imagenex831l/range',
-        '/jetson_1/imu/data',
-        '/jetson_1/ekf/status',
+        '/imu/data',
+        '/ekf/status',
         '/imagenex831l/range_raw'
     ]
 
     return LaunchDescription(
-        nodes + [
+        [
+            OpaqueFunction(function=ensure_required_arguments),
+            PushRosNamespace(namespace),
+        ] + nodes + [
             ExecuteProcess(
                 cmd=['ros2', 'bag', 'record'] + topics,
                 output='screen'
             )
         ]
     )
-
