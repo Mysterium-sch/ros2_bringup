@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.5)
 project(ros2_bringup)
 
 find_package(ament_cmake REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(rosbag2_py REQUIRED)
+find_package(imagenex831l_ros2 REQUIRED)
 
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 

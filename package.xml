@@ -16,6 +16,10 @@
   <build_depend>sensor_msgs</build_depend>
   <build_depend>cv2</build_depend>
   <build_depend>cv_bridge</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>rosbag2_py</build_depend>
+  <build_depend>imagenex831l_ros2</build_depend>
 
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>cv_bridge</exec_depend>
@@ -27,7 +31,10 @@
   <exec_depend>spinnaker_camera_driver</exec_depend>
   <exec_depend>ms5837_bar_ros</exec_depend>
   <exec_depend>microstrain_inertial_driver</exec_depend>
- 
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>rosbag2_py</exec_depend>
+  <exec_depend>imagenex831l_ros2</exec_depend>
 
   <!-- Exported packages -->
   <export>

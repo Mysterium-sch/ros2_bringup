@@ -3,6 +3,8 @@ from rclpy.node import Node
 from rclpy.serialization import serialize_message
 from sensor_msgs.msg import Image, Imu
 from std_msgs.msg import Float32, String
+from imagenex831l_ros2.msg import ProcessedRange, RawRange
+
 import rosbag2_py
 
 class SimpleBagRecorder(Node):
@@ -10,14 +12,18 @@ class SimpleBagRecorder(Node):
         super().__init__('simple_bag_recorder')
 
         # Declare parameters
-        self.declare_parameter('cam_topic', 'debayer/image_raw/rgb')
-        self.declare_parameter('depth_topic', 'bar30/depth')
-        self.declare_parameter('sonar_topic', 'imagenex831l/sonar_health')
+        self.declare_parameter('cam_topic', 'image/compressed')
+        self.declare_parameter('depth_topic_d', 'bar30/depth')
+        self.declare_parameter('depth_topic_p', 'bar30/pressure')
+        self.declare_parameter('depth_topic_t', 'bar30/temperature')
+        self.declare_parameter('sonar_topic', 'imagenex831l/range')
         self.declare_parameter('imu_topic', 'imu/data')
 
         # Get parameter values
         cam_topic = self.get_parameter('cam_topic').get_parameter_value().string_value
-        depth_topic = self.get_parameter('depth_topic').get_parameter_value().string_value
+        depth_topic_d = self.get_parameter('depth_topic_d').get_parameter_value().string_value
+        depth_topic_p = self.get_parameter('depth_topic_p').get_parameter_value().string_value
+        depth_topic_t = self.get_parameter('depth_topic_t').get_parameter_value().string_value
         sonar_topic = self.get_parameter('sonar_topic').get_parameter_value().string_value
         imu_topic = self.get_parameter('imu_topic').get_parameter_value().string_value
 
@@ -32,8 +38,10 @@ class SimpleBagRecorder(Node):
         # Create topics metadata
         topics = [
             (cam_topic, 'sensor_msgs/msg/Image'),
-            (depth_topic, 'std_msgs/msg/Float32'),
-            (sonar_topic, 'std_msgs/msg/String'),
+            (depth_topic_d, 'std_msgs/msg/Float32'),
+            (depth_topic_p, 'std_msgs/msg/Float32'),
+            (depth_topic_t, 'std_msgs/msg/Float32'),
+            (sonar_topic, 'imagenex831l_ros2/msg/ProcessedRange'),
             (imu_topic, 'sensor_msgs/msg/Imu')
         ]
 
@@ -51,14 +59,25 @@ class SimpleBagRecorder(Node):
             lambda msg: self.topic_callback(cam_topic, msg),
             10)
 
-        self.depth_sub_ = self.create_subscription(
+    #depth
+        self.depth_sub_d_ = self.create_subscription(
             Float32,
-            depth_topic,
-            lambda msg: self.topic_callback(depth_topic, msg),
+            depth_topic_d,
+            lambda msg: self.topic_callback(depth_topic_d, msg),
+            10)
+        self.depth_sub_p_ = self.create_subscription(
+            Float32,
+            depth_topic_p,
+            lambda msg: self.topic_callback(depth_topic_p, msg),
+            10)
+        self.depth_sub_t_ = self.create_subscription(
+            Float32,
+            depth_topic_t,
+            lambda msg: self.topic_callback(depth_topic_t, msg),
             10)
 
         self.sonar_sub_ = self.create_subscription(
-            String,
+            ProcessedRange,
             sonar_topic,
             lambda msg: self.topic_callback(sonar_topic, msg),
             10)
