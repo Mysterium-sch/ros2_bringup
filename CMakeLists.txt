@@ -9,6 +9,7 @@ ament_python_install_package(src)
 
 install(PROGRAMS 
   src/debayer.py
+  src/bag_node.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
