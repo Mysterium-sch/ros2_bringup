@@ -35,9 +35,14 @@ def generate_launch_description():
     )
 
     cam_dir = get_package_share_directory('spinnaker_camera_driver')
-    included_cam_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(cam_dir, 'launch', 'driver_node.launch.py')),
-        launch_arguments={'camera_type': camera_type, 'serial': serial}.items()
+    included_cam_launch = GroupAction(
+        actions=[
+            PushRosNamespace(namespace),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(os.path.join(cam_dir, 'launch', 'driver_node.launch.py')),
+                launch_arguments={'camera_type': camera_type, 'serial': serial}.items()
+            )
+        ]
     )
 
     ping1d_node = Node(
