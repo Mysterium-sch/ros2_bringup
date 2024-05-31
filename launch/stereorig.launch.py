@@ -119,8 +119,7 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
-            OpaqueFunction(function=ensure_required_arguments),
-            PushRosNamespace(namespace),
+            OpaqueFunction(function=ensure_required_arguments)
         ] + nodes + [
             ExecuteProcess(
                 cmd=['ros2', 'bag', 'record'] + topics,
