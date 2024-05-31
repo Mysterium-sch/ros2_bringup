@@ -107,14 +107,6 @@ def generate_launch_description():
         parameters=[{'cam_topic': cam_topic, 'device': namespace}]
     )
 
-    bag_node = Node(
-        package='ros2_bringup',
-        executable='bag_node.py',
-        name='bagger',
-        namespace=namespace,
-        output='screen'
-    )
-
     nodes = [
         included_cam_launch,
         ping1d_node,
@@ -122,13 +114,28 @@ def generate_launch_description():
         included_imu_launch,
         included_sonar_launch,
         included_screen_launch,
-        debayer_node,
-        bag_node
+        debayer_node
     ]
 
+    # This list should be in a params file
+    topics = [
+        'jetson_1/image/compressed',
+        'jetson_1/bar30/depth',
+        'jetson_1/bar30/pressure',
+        'jetson_1/bar30/temperature',
+        'jetson_1/imagenex831l/range',
+        'jetson_1/imu/data',
+        'jetson_1/ekf/status',
+        'jetson_1/imagenex831l/range_raw'
+    ]
 
     return LaunchDescription(
         [
             OpaqueFunction(function=ensure_required_arguments)
-        ] + nodes
+        ] + nodes + [
+            ExecuteProcess(
+                cmd=['ros2', 'bag', 'record'] + topics,
+                output='screen'
+            )
+        ]
     )
