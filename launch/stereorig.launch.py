@@ -95,7 +95,6 @@ def generate_launch_description():
         package='ros2_bringup',
         executable='debayer.py',
         name='debayer',
-        namespace=namespace,
         output='screen',
         parameters=[{'cam_topic': cam_topic, 'device': namespace}]
     )
