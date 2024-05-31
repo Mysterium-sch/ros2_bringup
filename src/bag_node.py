@@ -75,13 +75,13 @@ class SimpleBagRecorder(Node):
             depth_topic_t,
             lambda msg: self.topic_callback(depth_topic_t, msg),
             10)
-
+    #sonar
         self.sonar_sub_ = self.create_subscription(
             ProcessedRange,
             sonar_topic,
             lambda msg: self.topic_callback(sonar_topic, msg),
             10)
-
+    #imu
         self.imu_sub_ = self.create_subscription(
             Imu,
             imu_topic,
