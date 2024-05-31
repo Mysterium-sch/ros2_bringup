@@ -1,8 +1,8 @@
 import rclpy
 from rclpy.node import Node
 from rclpy.serialization import serialize_message
-from sensor_msgs.msg import Image, Imu
-from std_msgs.msg import Float32, String
+from sensor_msgs.msg import CompressedImage, Imu
+from std_msgs.msg import Float32
 from imagenex831l_ros2.msg import ProcessedRange, RawRange
 
 import rosbag2_py
@@ -39,7 +39,7 @@ class SimpleBagRecorder(Node):
 
         # Create topics metadata
         topics = [
-            (cam_topic, 'sensor_msgs/msg/Image'),
+            (cam_topic, 'sensor_msgs/msg/CompressedImage'),
             (depth_topic_d, 'std_msgs/msg/Float32'),
             (depth_topic_p, 'std_msgs/msg/Float32'),
             (depth_topic_t, 'std_msgs/msg/Float32'),
@@ -55,14 +55,13 @@ class SimpleBagRecorder(Node):
                 serialization_format='cdr')
             self.writer.create_topic(topic_info)
 
-    #Image
+        # Create subscriptions
         self.cam_sub_ = self.create_subscription(
-            Image,
+            CompressedImage,
             cam_topic,
             lambda msg: self.topic_callback(cam_topic, msg),
             10)
 
-    #depth
         self.depth_sub_d_ = self.create_subscription(
             Float32,
             depth_topic_d,
@@ -78,18 +77,18 @@ class SimpleBagRecorder(Node):
             depth_topic_t,
             lambda msg: self.topic_callback(depth_topic_t, msg),
             10)
-    #sonar
-        self.sonar_sub_ = self.create_subscription(
+
+        self.sonar_sub_pr_ = self.create_subscription(
             ProcessedRange,
             sonar_topic_pr,
-            lambda msg: self.topic_callback(sonar_topic, msg),
+            lambda msg: self.topic_callback(sonar_topic_pr, msg),
             10)
-        self.sonar_sub_ = self.create_subscription(
+        self.sonar_sub_rr_ = self.create_subscription(
             RawRange,
             sonar_topic_rr,
-            lambda msg: self.topic_callback(sonar_topic, msg),
+            lambda msg: self.topic_callback(sonar_topic_rr, msg),
             10)
-    #imu
+
         self.imu_sub_ = self.create_subscription(
             Imu,
             imu_topic,
