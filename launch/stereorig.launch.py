@@ -3,7 +3,7 @@ import launch
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node, PushRosNamespace
-from launch.actions import IncludeLaunchDescription, ExecuteProcess, OpaqueFunction
+from launch.actions import IncludeLaunchDescription, ExecuteProcess, OpaqueFunction, GroupAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 
@@ -54,27 +54,43 @@ def generate_launch_description():
         arguments=['0.0', '0.0', '0.0', '0', '0.0', '0.0', 'base_link', 'bar30_link']
     )
 
-    included_imu_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(_MICROSTRAIN_LAUNCH_FILE),
-        launch_arguments={'namespace': namespace}.items()
+    included_imu_launch = GroupAction(
+        actions=[
+            PushRosNamespace(namespace),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(_MICROSTRAIN_LAUNCH_FILE),
+                launch_arguments={'namespace': namespace}.items()
+            )
+        ]
     )
 
     sonar_dir = get_package_share_directory('imagenex831l_ros2')
-    included_sonar_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(sonar_dir, 'launch', 'sonar.launch.py')),
-        launch_arguments={'sonar': sonar, 'device': namespace}.items()
+    included_sonar_launch = GroupAction(
+        actions=[
+            PushRosNamespace(namespace),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(os.path.join(sonar_dir, 'launch', 'sonar.launch.py')),
+                launch_arguments={'sonar': sonar, 'device': namespace}.items()
+            )
+        ]
     )
     
     screen_dir = get_package_share_directory('custom_guyi')
-    included_screen_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(screen_dir, 'launch', 'gui.launch.py')),
-        launch_arguments={'cam_topic': cam_topic, 'device': namespace}.items()
+    included_screen_launch = GroupAction(
+        actions=[
+            PushRosNamespace(namespace),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(os.path.join(screen_dir, 'launch', 'gui.launch.py')),
+                launch_arguments={'cam_topic': cam_topic, 'device': namespace}.items(),
+            )
+        ]
     )
     
     debayer_node = Node(
         package='ros2_bringup',
         executable='debayer.py',
         name='debayer',
+        namespace=namespace,
         output='screen',
         parameters=[{'cam_topic': cam_topic, 'device': namespace}]
     )
