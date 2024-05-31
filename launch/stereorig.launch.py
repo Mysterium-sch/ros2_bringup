@@ -91,14 +91,14 @@ def generate_launch_description():
 
     # This list should be in a params file
     topics = [
-        '/image/compressed',
-        '/bar30/depth',
-        '/bar30/pressure',
-        '/bar30/temperature',
-        '/imagenex831l/range',
-        '/imu/data',
-        '/ekf/status',
-        '/imagenex831l/range_raw'
+        f'{namespace}/image/compressed',
+        f'{namespace}/bar30/depth',
+        f'{namespace}/bar30/pressure',
+        f'{namespace}/bar30/temperature',
+        f'{namespace}/imagenex831l/range',
+        f'{namespace}/imu/data',
+        f'{namespace}/ekf/status',
+        f'{namespace}/imagenex831l/range_raw'
     ]
 
     return LaunchDescription(
