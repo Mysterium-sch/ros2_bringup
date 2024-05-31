@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image, CompressedImage
@@ -10,12 +11,9 @@ class Debayer(Node):
     def __init__(self):
         super().__init__('debayer')
         self.bridge = CvBridge()
-        self.declare_parameter("device", "")
-        device = self.get_parameter('device').value
-        self.image_pub_grey = self.create_publisher(Image, f'{device}/debayer/image_raw/grey', 10)
-        self.image_pub_rgb = self.create_publisher(Image, f'{device}/debayer/image_raw/rgb', 10)
-        self.image_sub = self.create_subscription(Image, f'{device}/flir_camera/image_raw', self.im_callback, 10)
-        self.image_com = self.create_publisher(CompressedImage, f'{device}/image/compressed', 10)
+        self.image_pub_rgb = self.create_publisher(Image, 'debayer/image_raw/rgb', 10)
+        self.image_com = self.create_publisher(CompressedImage, 'image/compressed', 10) # please change name of the var
+        self.image_sub = self.create_subscription(Image, 'flir_camera/image_raw', self.im_callback, 10)
 	
         self.image_sub
 
@@ -24,11 +22,9 @@ class Debayer(Node):
         img_in_cv2 = self.bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')
         gray = cv.cvtColor(img_in_cv2, cv.COLOR_BayerRG2GRAY)
         rgb = cv.cvtColor(img_in_cv2, cv.COLOR_BayerRG2BGR)
-        gray_image = self.bridge.cv2_to_imgmsg(gray, "mono8")
         rgb_image = self.bridge.cv2_to_imgmsg(rgb, "rgb8")   
         img_msg = self.bridge.cv2_to_compressed_imgmsg(rgb)
         self.image_com.publish(img_msg)
-        self.image_pub_grey.publish(gray_image)
         self.image_pub_rgb.publish(rgb_image)        
 
 def main(args=None):
