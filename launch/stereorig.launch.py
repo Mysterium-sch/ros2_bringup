@@ -33,6 +33,11 @@ def generate_launch_description():
         get_package_share_directory('microstrain_inertial_driver'),
         'config', 'empty.yml'
     )
+    
+    config = os.path.join(get_package_share_directory('imagenex831l_ros2'),
+        'cfg',
+        'sonar.yaml'
+    )
 
     cam_dir = get_package_share_directory('spinnaker_camera_driver')
     included_cam_launch = GroupAction(
@@ -77,7 +82,7 @@ def generate_launch_description():
             PushRosNamespace(namespace),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(os.path.join(sonar_dir, 'launch', 'sonar.launch.py')),
-                launch_arguments={'sonar': sonar, 'device': namespace}.items()
+                launch_arguments={'sonar': sonar, 'device': namespace, 'config': config}.items()
             )
         ]
     )
