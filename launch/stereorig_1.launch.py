@@ -20,6 +20,7 @@ def generate_launch_description():
     serial = LaunchConfiguration('serial')
     sonar = LaunchConfiguration('sonar')
     cam_topic = LaunchConfiguration('cam_topic')
+    frequency = LaunchConfiguration('frequency')
 
     _MICROSTRAIN_LAUNCH_FILE = os.path.join(
         get_package_share_directory('microstrain_inertial_examples'),
@@ -45,7 +46,7 @@ def generate_launch_description():
             PushRosNamespace(namespace),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(os.path.join(cam_dir, 'launch', 'driver_node.launch.py')),
-                launch_arguments={'camera_type': camera_type, 'serial': serial}.items()
+                launch_arguments={'camera_type': camera_type, 'serial': serial, 'frame_rate': frequency}.items()
             )
         ]
     )

@@ -1,0 +1,19 @@
+/jetson_1:
+  ros__parameters:
+  camera_type: 'blackfly_s'
+  serial: '21502646'
+  sonar: 'false'
+  cam_topic: '/debayer/image_raw/compressed'
+  namespace: 'jetson_1'
+  frequency: 30
+
+
+
+/jetson_2:
+  ros__parameters:
+  camera_type: 'blackfly_s'
+  serial: '21387972'
+  sonar: 'true'
+  cam_topic: '/debayer/image_raw/compressed'
+  namespace: 'jetson_2'
+  frequency: 30
