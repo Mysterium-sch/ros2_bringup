@@ -1,5 +1,6 @@
 import os
 import launch
+import yaml
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node, PushRosNamespace
@@ -7,20 +8,18 @@ from launch.actions import IncludeLaunchDescription, ExecuteProcess, OpaqueFunct
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 
-def ensure_required_arguments(context, *args, **kwargs):
-    required_args = ['namespace', 'camera_type', 'serial', 'sonar', 'cam_topic']
-    for arg in required_args:
-        if not context.launch_configurations.get(arg):
-            raise RuntimeError(f"The '{arg}' argument is required.")
-    return []
-
 def generate_launch_description():
+
+    launch_params_path = os.path.join(get_package_share_directory('ros2_bringup'), 'config', 'parms.yaml')
+    with open(launch_params_path, 'r') as f:
+        launch_params = yaml.safe_load(f)
+
+    camera_type = launch_params["jetson_2"]['ros_parameters']['camera_type']
+    serial = launch_params["jetson_2"]['ros_parameters']['serial']
+    sonar = launch_params["jetson_2"]['ros_parameters']['sonar']
+    cam_topic = launch_params["jetson_2"]['ros_parameters']['cam_topic']
+    frequency = launch_params["jetson_2"]['ros_parameters']['frequency']
     namespace = LaunchConfiguration('namespace')
-    camera_type = LaunchConfiguration('camera_type')
-    serial = LaunchConfiguration('serial')
-    sonar = LaunchConfiguration('sonar')
-    cam_topic = LaunchConfiguration('cam_topic')
-    frequency = LaunchConfiguration('frequency')
 
     _MICROSTRAIN_LAUNCH_FILE = os.path.join(
         get_package_share_directory('microstrain_inertial_examples'),
@@ -58,7 +57,6 @@ def generate_launch_description():
         output="screen"
     )
 
-    # TODO: Fix Me
     base_to_range = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
@@ -131,9 +129,7 @@ def generate_launch_description():
     ]
 
     return LaunchDescription(
-        [
-            OpaqueFunction(function=ensure_required_arguments)
-        ] + nodes + [
+        nodes + [
             ExecuteProcess(
                 cmd=['ros2', 'bag', 'record'] + topics,
                 output='screen'
