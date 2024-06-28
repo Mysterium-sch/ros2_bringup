@@ -14,7 +14,6 @@ class Debayer(Node):
         self.image_pub_rgb = self.create_publisher(Image, 'debayer/image_raw/rgb', 10)
         self.image_com = self.create_publisher(CompressedImage, 'image/compressed', 10) # please change name of the var
 	
-        self.image_sub
 
     def im_callback(self, msg):
         data = msg
