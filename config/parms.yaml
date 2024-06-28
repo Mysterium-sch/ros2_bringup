@@ -3,7 +3,7 @@ jetson_1:
     camera_type: 'blackfly_s'
     serial: "'21502646'"
     sonar: 'false'
-    cam_topic: '/image/compressed'
+    cam_topic: '/jetson_1/image/compressed'
     namespace: 'jetson_1'
     frequency: '30.0'
 
@@ -12,6 +12,6 @@ jetson_2:
     camera_type: 'blackfly_s'
     serial: "'21387972'"
     sonar: 'true'
-    cam_topic: '/image/compressed'
+    cam_topic: '/jetson_2/image/compressed'
     namespace: 'jetson_2'
     frequency: '30.0'
