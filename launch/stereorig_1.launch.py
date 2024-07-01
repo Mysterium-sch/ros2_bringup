@@ -42,33 +42,6 @@ def generate_launch_description():
     chunk_enable_timestamp = launch_params["jetson_1"]['ros_parameters']['chunk_enable_timestamp']
     namespace = LaunchConfiguration('namespace')
 
-    flir_params = {
-    'camera_type': camera_type,
-    'serial': serial,
-    'debug': debug,
-    'compute_brightness': compute_brightness,
-    'adjust_timestamp': adjust_timestamp,
-    'dump_node_map': dump_node_map,
-    'gain_auto': gain_auto,
-    'exposure_auto': exposure_auto,
-    'user_set_selector': user_set_selector,
-    'user_set_load': user_set_load,
-    'frame_rate_auto': frame_rate_auto,
-    'frame_rate': frame_rate,
-    'frame_rate_enable': frame_rate_enable,
-    'buffer_queue_size': buffer_queue_size,
-    'trigger_mode': trigger_mode,
-    'chunk_mode_active': chunk_mode_active,
-    'chunk_selector_frame_id': chunk_selector_frame_id,
-    'chunk_enable_frame_id': chunk_enable_frame_id,
-    'chunk_selector_exposure_time': chunk_selector_exposure_time,
-    'chunk_enable_exposure_time': chunk_enable_exposure_time,
-    'chunk_selector_gain': chunk_selector_gain,
-    'chunk_enable_gain': chunk_enable_gain,
-    'chunk_selector_timestamp': chunk_selector_timestamp,
-    'chunk_enable_timestamp': chunk_enable_timestamp
-}
-
     _MICROSTRAIN_LAUNCH_FILE = os.path.join(
         get_package_share_directory('microstrain_inertial_examples'),
         'launch', 'cv7_launch.py'
@@ -93,7 +66,7 @@ def generate_launch_description():
             PushRosNamespace(namespace),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(os.path.join(cam_dir, 'launch', 'driver_node.launch.py')),
-                launch_arguments={flir_params}.items()
+                launch_arguments={'camera_type': camera_type, 'serial': serial,'debug': debug,'compute_brightness': compute_brightness,'adjust_timestamp': adjust_timestamp,'dump_node_map': dump_node_map,'gain_auto': gain_auto,'exposure_auto': exposure_auto,'user_set_selector': user_set_selector,'user_set_load': user_set_load,'frame_rate_auto': frame_rate_auto,'frame_rate': frame_rate,'frame_rate_enable': frame_rate_enable,'buffer_queue_size': buffer_queue_size,'trigger_mode': trigger_mode,'chunk_mode_active': chunk_mode_active,'chunk_selector_frame_id': chunk_selector_frame_id,'chunk_enable_frame_id': chunk_enable_frame_id,'chunk_selector_exposure_time': chunk_selector_exposure_time,'chunk_enable_exposure_time': chunk_enable_exposure_time,'chunk_selector_gain': chunk_selector_gain,'chunk_enable_gain': chunk_enable_gain,'chunk_selector_timestamp': chunk_selector_timestamp,'chunk_enable_timestamp': chunk_enable_timestamp}.items()
             )
         ]
     )
