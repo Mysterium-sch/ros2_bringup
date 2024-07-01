@@ -1,8 +1,9 @@
 jetson_1:
   ros_parameters:
+    device: 'jetson_1'
     camera_type: 'blackfly_s'                         # declares camera type
     serial: "'21502646'"                              # sets camera serial for connection
-    sonar: ''False''                                    # sonar launch boolean
+    sonar: 'false'                                    # sonar launch boolean
     cam_topic: '/jetson_1/image/compressed'           # sets topic gui displays
     # The following parameters are for flir camera
     debug: 'False'    
@@ -30,13 +31,14 @@ jetson_1:
 
 jetson_2:
   ros_parameters:
+    device: 'jetson_2'
     camera_type: 'blackfly_s'                         # declares camera type
     serial: "'21387972'"                              # sets camera serial for connection
-    sonar: ''True''                                    # sonar launch boolean
+    sonar: 'true'                                    # sonar launch boolean
     cam_topic: '/jetson_2/image/compressed'           # sets topic gui displays
     # The following parameters are for flir camera
     debug: 'False'    
-    compute_brightness: 'False'    
+    compute_brightness: 'False' 
     adjust_timestamp: 'True'    
     dump_node_map: 'False'    
     gain_auto: 'Continuous'    

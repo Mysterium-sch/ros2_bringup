@@ -15,6 +15,7 @@ def generate_launch_description():
         launch_params = yaml.safe_load(f)
 
     camera_type = launch_params["jetson_2"]['ros_parameters']['camera_type']
+    device = launch_params["jetson_2"]['ros_parameters']['device']
     serial = launch_params["jetson_2"]['ros_parameters']['serial']
     sonar = launch_params["jetson_2"]['ros_parameters']['sonar']
     cam_topic = launch_params["jetson_2"]['ros_parameters']['cam_topic']
@@ -102,7 +103,7 @@ def generate_launch_description():
             PushRosNamespace(namespace),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(os.path.join(sonar_dir, 'launch', 'sonar.launch.py')),
-                launch_arguments={'sonar': sonar, 'device': namespace, 'config': config}.items()
+                launch_arguments={'sonar': sonar, 'device': device, 'config': config}.items()
             )
         ]
     )
@@ -113,7 +114,7 @@ def generate_launch_description():
             PushRosNamespace(namespace),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(os.path.join(screen_dir, 'launch', 'gui.launch.py')),
-                launch_arguments={'cam_topic': cam_topic, 'device': namespace}.items(),
+                launch_arguments={'cam_topic': cam_topic, 'device': device}.items(),
             )
         ]
     )
@@ -124,7 +125,7 @@ def generate_launch_description():
         name='debayer',
         namespace=namespace,
         output='screen',
-        parameters=[{'cam_topic': cam_topic, 'device': namespace}]
+        parameters=[{'cam_topic': cam_topic, 'device': device}]
     )
 
     nodes = [
