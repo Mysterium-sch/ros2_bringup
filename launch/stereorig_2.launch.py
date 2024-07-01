@@ -18,8 +18,57 @@ def generate_launch_description():
     serial = launch_params["jetson_2"]['ros_parameters']['serial']
     sonar = launch_params["jetson_2"]['ros_parameters']['sonar']
     cam_topic = launch_params["jetson_2"]['ros_parameters']['cam_topic']
-    frequency = launch_params["jetson_2"]['ros_parameters']['frequency']
+    debug = launch_params["jetson_2"]['ros_parameters']['debug']
+    compute_brightness = launch_params["jetson_2"]['ros_parameters']['compute_brightness']
+    adjust_timestamp = launch_params["jetson_2"]['ros_parameters']['adjust_timestamp']
+    dump_node_map = launch_params["jetson_2"]['ros_parameters']['dump_node_map']
+    gain_auto = launch_params["jetson_2"]['ros_parameters']['gain_auto']
+    exposure_auto = launch_params["jetson_2"]['ros_parameters']['exposure_auto']
+    user_set_selector = launch_params["jetson_2"]['ros_parameters']['user_set_selector']
+    user_set_load = launch_params["jetson_2"]['ros_parameters']['user_set_load']
+    frame_rate_auto = launch_params["jetson_2"]['ros_parameters']['frame_rate_auto']
+    frame_rate = launch_params["jetson_2"]['ros_parameters']['frame_rate']
+    frame_rate_enable = launch_params["jetson_2"]['ros_parameters']['frame_rate_enable']
+    buffer_queue_size = launch_params["jetson_2"]['ros_parameters']['buffer_queue_size']
+    trigger_mode = launch_params["jetson_2"]['ros_parameters']['trigger_mode']
+    chunk_mode_active = launch_params["jetson_2"]['ros_parameters']['chunk_mode_active']
+    chunk_selector_frame_id = launch_params["jetson_2"]['ros_parameters']['chunk_selector_frame_id']
+    chunk_enable_frame_id = launch_params["jetson_2"]['ros_parameters']['chunk_enable_frame_id']
+    chunk_selector_exposure_time = launch_params["jetson_2"]['ros_parameters']['chunk_selector_exposure_time']
+    chunk_enable_exposure_time = launch_params["jetson_2"]['ros_parameters']['chunk_enable_exposure_time']
+    chunk_selector_gain = launch_params["jetson_2"]['ros_parameters']['chunk_selector_gain']
+    chunk_enable_gain = launch_params["jetson_2"]['ros_parameters']['chunk_enable_gain']
+    chunk_selector_timestamp = launch_params["jetson_2"]['ros_parameters']['chunk_selector_timestamp']
+    chunk_enable_timestamp = launch_params["jetson_2"]['ros_parameters']['chunk_enable_timestamp']
     namespace = LaunchConfiguration('namespace')
+
+    flir_params = {
+    'camera_type': camera_type,
+    'serial': serial,
+    'debug': debug,
+    'compute_brightness': compute_brightness,
+    'adjust_timestamp': adjust_timestamp,
+    'dump_node_map': dump_node_map,
+    'gain_auto': gain_auto,
+    'exposure_auto': exposure_auto,
+    'user_set_selector': user_set_selector,
+    'user_set_load': user_set_load,
+    'frame_rate_auto': frame_rate_auto,
+    'frame_rate': frame_rate,
+    'frame_rate_enable': frame_rate_enable,
+    'buffer_queue_size': buffer_queue_size,
+    'trigger_mode': trigger_mode,
+    'chunk_mode_active': chunk_mode_active,
+    'chunk_selector_frame_id': chunk_selector_frame_id,
+    'chunk_enable_frame_id': chunk_enable_frame_id,
+    'chunk_selector_exposure_time': chunk_selector_exposure_time,
+    'chunk_enable_exposure_time': chunk_enable_exposure_time,
+    'chunk_selector_gain': chunk_selector_gain,
+    'chunk_enable_gain': chunk_enable_gain,
+    'chunk_selector_timestamp': chunk_selector_timestamp,
+    'chunk_enable_timestamp': chunk_enable_timestamp
+}
+
 
     _MICROSTRAIN_LAUNCH_FILE = os.path.join(
         get_package_share_directory('microstrain_inertial_examples'),
@@ -45,7 +94,7 @@ def generate_launch_description():
             PushRosNamespace(namespace),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(os.path.join(cam_dir, 'launch', 'driver_node.launch.py')),
-                launch_arguments={'camera_type': camera_type, 'serial': serial, 'frame_rate': frequency}.items()
+                launch_arguments={flir_params}.items()
             )
         ]
     )
