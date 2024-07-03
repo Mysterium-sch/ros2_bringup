@@ -1,6 +1,7 @@
 import os
 import launch
 import yaml
+import datetime
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node, PushRosNamespace
@@ -8,9 +9,25 @@ from launch.actions import IncludeLaunchDescription, ExecuteProcess, OpaqueFunct
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 
+def bag_exists(time_cap):
+    file_path = '/ws/data/'
+    num= 0
+    for dirpath, dirnames, filenames in os.walk(file_path):
+        for dirname in dirnames:
+            if time_cap in dirname:
+                num = num + 1
+    return num
+
 def generate_launch_description():
 
-    launch_params_path = os.path.join('/ws/data/config/parms.yaml')
+    ct = datetime.datetime.now()
+    ct_str = ct.strftime("%Y-%m-%d %H:%M:%S")
+    num_files = bag_exists(ct_str)
+    if(num_files > 0 and num_files != 0):
+        ct_str = ctr_str + "_" + str(num)
+
+
+    launch_params_path = os.path.join('/catkin_ws/data/config/parms.yaml')
     with open(launch_params_path, 'r') as f:
         launch_params = yaml.safe_load(f)
 
@@ -153,7 +170,7 @@ def generate_launch_description():
     return LaunchDescription(
         nodes + [
             ExecuteProcess(
-                cmd=['ros2', 'bag', 'record'] + topics,
+                cmd=['ros2', 'bag', 'record', '-o', ct_str] + topics,
                 output='screen'
             )
         ]
