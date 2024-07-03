@@ -26,7 +26,7 @@ def generate_launch_description():
     if num_files > 0:
         ct_str = ct_str + "_" + str(num)
 
-    launch_params_path = os.path.join('/catkin_ws/data/config/parms.yaml')
+    launch_params_path = os.path.join('/ws/data/config/parms.yaml')
     with open(launch_params_path, 'r') as f:
         launch_params = yaml.safe_load(f)
 
