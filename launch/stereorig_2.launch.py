@@ -21,7 +21,7 @@ def bag_exists(time_cap):
 def generate_launch_description():
 
     ct = datetime.datetime.now()
-    ct_str = ct.strftime("%Y-%m-%d %H:%M:%S")
+    ct_str = ct.strftime("%Y-%m-%d-%H:%M:%S")
     num_files = bag_exists(ct_str)
     if(num_files > 0 and num_files != 0):
         ct_str = ctr_str + "_" + str(num)
