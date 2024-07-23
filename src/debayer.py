@@ -19,7 +19,7 @@ class Debayer(Node):
         data = msg
         img_in_cv2 = self.bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')
         rgb = cv.cvtColor(img_in_cv2, cv.COLOR_BayerRG2BGR)
-        rgb_image = self.bridge.cv2_to_imgmsg(rgb, "rgb8")   
+        rgb_image = self.bridge.cv2_to_imgmsg(rgb, "bgr8")   
         img_msg = self.bridge.cv2_to_compressed_imgmsg(rgb)
         self.image_com.publish(img_msg)  
 

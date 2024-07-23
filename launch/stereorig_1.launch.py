@@ -169,7 +169,7 @@ def generate_launch_description():
     return LaunchDescription(
         nodes + [
             ExecuteProcess(
-                cmd=['ros2', 'bag', 'record', '-o', ct_str] + topics,
+                cmd=['ros2', 'bag', 'record', '--storage', 'sqlite3', '-o', ct_str] + topics,
                 output='screen'
             )
         ]
