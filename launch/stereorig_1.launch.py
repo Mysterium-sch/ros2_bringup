@@ -39,6 +39,7 @@ def generate_launch_description():
     compute_brightness = launch_params["jetson_1"]['ros_parameters']['compute_brightness']
     adjust_timestamp = launch_params["jetson_1"]['ros_parameters']['adjust_timestamp']
     dump_node_map = launch_params["jetson_1"]['ros_parameters']['dump_node_map']
+    pixel_format = launch_params["jetson_1"]['ros_parameters']['pixel_format']
     gain_auto = launch_params["jetson_1"]['ros_parameters']['gain_auto']
     exposure_auto = launch_params["jetson_1"]['ros_parameters']['exposure_auto']
     user_set_selector = launch_params["jetson_1"]['ros_parameters']['user_set_selector']
@@ -57,6 +58,7 @@ def generate_launch_description():
     chunk_enable_gain = launch_params["jetson_1"]['ros_parameters']['chunk_enable_gain']
     chunk_selector_timestamp = launch_params["jetson_1"]['ros_parameters']['chunk_selector_timestamp']
     chunk_enable_timestamp = launch_params["jetson_1"]['ros_parameters']['chunk_enable_timestamp']
+    adc_bit_depth = launch_params["jetson_1"]['ros_parameters']['adc_bit_depth']
     namespace = LaunchConfiguration('namespace')
 
     _MICROSTRAIN_LAUNCH_FILE = os.path.join(
@@ -135,14 +137,6 @@ def generate_launch_description():
         ]
     )
     
-    debayer_node = Node(
-        package='ros2_bringup',
-        executable='debayer.py',
-        name='debayer',
-        namespace=namespace,
-        output='screen',
-        parameters=[{'cam_topic': cam_topic, 'device': device}]
-    )
 
     nodes = [
         included_cam_launch,
@@ -150,13 +144,12 @@ def generate_launch_description():
         base_to_range,
         included_imu_launch,
         included_sonar_launch,
-        included_screen_launch,
-        debayer_node
+        included_screen_launch
     ]
 
     # This list should be in a params file
     topics = [
-        'jetson_1/image/compressed',
+        'jetson_1/flir_camera/image_raw/compressed',
         'jetson_1/bar30/depth',
         'jetson_1/bar30/pressure',
         'jetson_1/bar30/temperature',
