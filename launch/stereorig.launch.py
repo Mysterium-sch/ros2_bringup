@@ -1,21 +1,20 @@
 import os
-import launch
 import yaml
 import datetime
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node, PushRosNamespace
-from launch.actions import IncludeLaunchDescription, ExecuteProcess, OpaqueFunction, GroupAction
+from launch.actions import IncludeLaunchDescription, GroupAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 
 def bag_exists(time_cap):
     file_path = '/ws/data/'
-    num= 0
+    num = 0
     for dirpath, dirnames, filenames in os.walk(file_path):
         for dirname in dirnames:
             if time_cap in dirname:
-                num = num + 1
+                num += 1
     return num
 
 def generate_launch_description():
@@ -24,13 +23,12 @@ def generate_launch_description():
     ct_str = ct.strftime("%Y-%m-%d-%H_%M_%S")
     num_files = bag_exists(ct_str)
     if num_files > 0:
-        ct_str = ct_str + "_" + str(num)
+        ct_str = ct_str + "_" + str(num_files)
 
     launch_params_path = os.path.join('/ws/data/config/parms.yaml')
     with open(launch_params_path, 'r') as f:
         launch_params = yaml.safe_load(f)
 
-    #pixel_format = launch_params["jetson_1"]['ros_parameters']['pixel_format']
     camera_type = launch_params["jetson_1"]['ros_parameters']['camera_type']
     device = launch_params["jetson_1"]['ros_parameters']['device']
     serial = launch_params["jetson_1"]['ros_parameters']['serial']
@@ -58,7 +56,7 @@ def generate_launch_description():
     chunk_enable_gain = launch_params["jetson_1"]['ros_parameters']['chunk_enable_gain']
     chunk_selector_timestamp = launch_params["jetson_1"]['ros_parameters']['chunk_selector_timestamp']
     chunk_enable_timestamp = launch_params["jetson_1"]['ros_parameters']['chunk_enable_timestamp']
-    #adc_bit_depth = launch_params["jetson_1"]['ros_parameters']['adc_bit_depth']
+    
     namespace = LaunchConfiguration('namespace')
 
     _MICROSTRAIN_LAUNCH_FILE = os.path.join(
@@ -85,7 +83,32 @@ def generate_launch_description():
             PushRosNamespace(namespace),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(os.path.join(cam_dir, 'launch', 'driver_node.launch.py')),
-                launch_arguments={'camera_type': camera_type, 'serial': serial,'debug': debug,'compute_brightness': compute_brightness,'adjust_timestamp': adjust_timestamp,'dump_node_map': dump_node_map,'gain_auto': gain_auto,'exposure_auto': exposure_auto,'user_set_selector': user_set_selector,'user_set_load': user_set_load,'frame_rate_auto': frame_rate_auto,'frame_rate': frame_rate,'frame_rate_enable': frame_rate_enable,'buffer_queue_size': buffer_queue_size,'trigger_mode': trigger_mode,'chunk_mode_active': chunk_mode_active,'chunk_selector_frame_id': chunk_selector_frame_id,'chunk_enable_frame_id': chunk_enable_frame_id,'chunk_selector_exposure_time': chunk_selector_exposure_time,'chunk_enable_exposure_time': chunk_enable_exposure_time,'chunk_selector_gain': chunk_selector_gain,'chunk_enable_gain': chunk_enable_gain,'chunk_selector_timestamp': chunk_selector_timestamp,'chunk_enable_timestamp': chunk_enable_timestamp}.items()
+                launch_arguments={
+                    'camera_type': camera_type,
+                    'serial': serial,
+                    'debug': debug,
+                    'compute_brightness': compute_brightness,
+                    'adjust_timestamp': adjust_timestamp,
+                    'dump_node_map': dump_node_map,
+                    'gain_auto': gain_auto,
+                    'exposure_auto': exposure_auto,
+                    'user_set_selector': user_set_selector,
+                    'user_set_load': user_set_load,
+                    'frame_rate_auto': frame_rate_auto,
+                    'frame_rate': frame_rate,
+                    'frame_rate_enable': frame_rate_enable,
+                    'buffer_queue_size': buffer_queue_size,
+                    'trigger_mode': trigger_mode,
+                    'chunk_mode_active': chunk_mode_active,
+                    'chunk_selector_frame_id': chunk_selector_frame_id,
+                    'chunk_enable_frame_id': chunk_enable_frame_id,
+                    'chunk_selector_exposure_time': chunk_selector_exposure_time,
+                    'chunk_enable_exposure_time': chunk_enable_exposure_time,
+                    'chunk_selector_gain': chunk_selector_gain,
+                    'chunk_enable_gain': chunk_enable_gain,
+                    'chunk_selector_timestamp': chunk_selector_timestamp,
+                    'chunk_enable_timestamp': chunk_enable_timestamp
+                }.items()
             )
         ]
     )
@@ -136,10 +159,17 @@ def generate_launch_description():
             )
         ]
     )
-    
+
+    rosbag_node = Node(
+        package='ros2_bringup',
+        executable='rosbag.py',
+        namespace=namespace,
+        arguments=[device]
+    )
 
     nodes = [
         included_cam_launch,
+        rosbag_node,
         ping1d_node,
         base_to_range,
         included_imu_launch,
@@ -147,23 +177,4 @@ def generate_launch_description():
         included_screen_launch
     ]
 
-    # This list should be in a params file
-    topics = [
-        'jetson_1/flir_camera/image_raw/compressed',
-        'jetson_1/bar30/depth',
-        'jetson_1/bar30/pressure',
-        'jetson_1/bar30/temperature',
-        'jetson_1/imagenex831l/range',
-        'jetson_1/imu/data',
-        'jetson_1/ekf/status',
-        'jetson_1/imagenex831l/range_raw'
-    ]
-
-    return LaunchDescription(
-        nodes + [
-            ExecuteProcess(
-                cmd=['ros2', 'bag', 'record', '--storage', 'sqlite3', '-o', ct_str] + topics,
-                output='screen'
-            )
-        ]
-    )
+    return LaunchDescription(nodes)
