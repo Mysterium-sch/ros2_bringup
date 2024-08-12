@@ -30,6 +30,7 @@ def generate_launch_description():
     with open(launch_params_path, 'r') as f:
         launch_params = yaml.safe_load(f)
 
+    pixel_format = launch_params["jetson_1"]['ros_parameters']['pixel_format']
     camera_type = launch_params["jetson_1"]['ros_parameters']['camera_type']
     device = launch_params["jetson_1"]['ros_parameters']['device']
     serial = launch_params["jetson_1"]['ros_parameters']['serial']
@@ -39,7 +40,6 @@ def generate_launch_description():
     compute_brightness = launch_params["jetson_1"]['ros_parameters']['compute_brightness']
     adjust_timestamp = launch_params["jetson_1"]['ros_parameters']['adjust_timestamp']
     dump_node_map = launch_params["jetson_1"]['ros_parameters']['dump_node_map']
-    pixel_format = launch_params["jetson_1"]['ros_parameters']['pixel_format']
     gain_auto = launch_params["jetson_1"]['ros_parameters']['gain_auto']
     exposure_auto = launch_params["jetson_1"]['ros_parameters']['exposure_auto']
     user_set_selector = launch_params["jetson_1"]['ros_parameters']['user_set_selector']
