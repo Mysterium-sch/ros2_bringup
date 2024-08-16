@@ -12,6 +12,7 @@ ament_python_install_package(src)
 
 install(PROGRAMS 
   src/debayer.py
+  src/rosbag.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

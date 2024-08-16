@@ -61,31 +61,56 @@ def generate_launch_description():
     #adc_bit_depth = launch_params["jetson_1"]['ros_parameters']['adc_bit_depth']
     namespace = LaunchConfiguration('namespace')
 
-    _MICROSTRAIN_LAUNCH_FILE = os.path.join(
+   
+    # Paths to various files
+    microstrain_launch_file = os.path.join(
         get_package_share_directory('microstrain_inertial_examples'),
         'launch', 'cv7_launch.py'
     )
-    _CV7_PARAMS_FILE = os.path.join(
+    cv7_params_file = os.path.join(
         get_package_share_directory('microstrain_inertial_examples'),
         'config', 'cv7', 'cv7.yml'
     )
-    _EMPTY_PARAMS_FILE = os.path.join(
-        get_package_share_directory('microstrain_inertial_driver'),
-        'config', 'empty.yml'
+    sonar_config = os.path.join(
+        get_package_share_directory('imagenex831l_ros2'),
+        'cfg', 'sonar.yaml'
     )
-    
-    config = os.path.join(get_package_share_directory('imagenex831l_ros2'),
-        'cfg',
-        'sonar.yaml'
-    )
-
     cam_dir = get_package_share_directory('spinnaker_camera_driver')
+    sonar_dir = get_package_share_directory('imagenex831l_ros2')
+    screen_dir = get_package_share_directory('custom_guyi')
+
+    # Group actions and nodes
     included_cam_launch = GroupAction(
         actions=[
             PushRosNamespace(namespace),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(os.path.join(cam_dir, 'launch', 'driver_node.launch.py')),
-                launch_arguments={'camera_type': camera_type, 'serial': serial,'debug': debug,'compute_brightness': compute_brightness,'adjust_timestamp': adjust_timestamp,'dump_node_map': dump_node_map,'gain_auto': gain_auto,'exposure_auto': exposure_auto,'user_set_selector': user_set_selector,'user_set_load': user_set_load,'frame_rate_auto': frame_rate_auto,'frame_rate': frame_rate,'frame_rate_enable': frame_rate_enable,'buffer_queue_size': buffer_queue_size,'trigger_mode': trigger_mode,'chunk_mode_active': chunk_mode_active,'chunk_selector_frame_id': chunk_selector_frame_id,'chunk_enable_frame_id': chunk_enable_frame_id,'chunk_selector_exposure_time': chunk_selector_exposure_time,'chunk_enable_exposure_time': chunk_enable_exposure_time,'chunk_selector_gain': chunk_selector_gain,'chunk_enable_gain': chunk_enable_gain,'chunk_selector_timestamp': chunk_selector_timestamp,'chunk_enable_timestamp': chunk_enable_timestamp}.items()
+                launch_arguments={
+                    'camera_type': camera_type,
+                    'serial': serial,
+                    'debug': debug,
+                    'compute_brightness': compute_brightness,
+                    'adjust_timestamp': adjust_timestamp,
+                    'dump_node_map': dump_node_map,
+                    'gain_auto': gain_auto,
+                    'exposure_auto': exposure_auto,
+                    'user_set_selector': user_set_selector,
+                    'user_set_load': user_set_load,
+                    'frame_rate_auto': frame_rate_auto,
+                    'frame_rate': frame_rate,
+                    'frame_rate_enable': frame_rate_enable,
+                    'buffer_queue_size': buffer_queue_size,
+                    'trigger_mode': trigger_mode,
+                    'chunk_mode_active': chunk_mode_active,
+                    'chunk_selector_frame_id': chunk_selector_frame_id,
+                    'chunk_enable_frame_id': chunk_enable_frame_id,
+                    'chunk_selector_exposure_time': chunk_selector_exposure_time,
+                    'chunk_enable_exposure_time': chunk_enable_exposure_time,
+                    'chunk_selector_gain': chunk_selector_gain,
+                    'chunk_enable_gain': chunk_enable_gain,
+                    'chunk_selector_timestamp': chunk_selector_timestamp,
+                    'chunk_enable_timestamp': chunk_enable_timestamp
+                }.items()
             )
         ]
     )
@@ -109,24 +134,22 @@ def generate_launch_description():
         actions=[
             PushRosNamespace(namespace),
             IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(_MICROSTRAIN_LAUNCH_FILE),
+                PythonLaunchDescriptionSource(microstrain_launch_file),
                 launch_arguments={'namespace': namespace}.items()
             )
         ]
     )
 
-    sonar_dir = get_package_share_directory('imagenex831l_ros2')
     included_sonar_launch = GroupAction(
         actions=[
             PushRosNamespace(namespace),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(os.path.join(sonar_dir, 'launch', 'sonar.launch.py')),
-                launch_arguments={'sonar': sonar, 'device': device, 'config': config}.items()
+                launch_arguments={'sonar': sonar, 'device': device, 'config': sonar_config}.items()
             )
         ]
     )
     
-    screen_dir = get_package_share_directory('custom_guyi')
     included_screen_launch = GroupAction(
         actions=[
             PushRosNamespace(namespace),
@@ -136,34 +159,29 @@ def generate_launch_description():
             )
         ]
     )
-    
 
-    nodes = [
+    april_tag = Node(
+        package='apriltag_ros',
+        executable='apriltag_node',
+        namespace=namespace,
+        arguments=["/flir_camera/image_raw/compressed"]
+    )
+
+    rosbag_node = Node(
+        package='ros2_bringup',
+        executable='rosbag.py',
+        namespace=namespace,
+        arguments=[device]
+    )
+
+    # Return the LaunchDescription
+    return LaunchDescription([
+        april_tag,
         included_cam_launch,
+        rosbag_node,
         ping1d_node,
         base_to_range,
         included_imu_launch,
         included_sonar_launch,
         included_screen_launch
-    ]
-
-    # This list should be in a params file
-    topics = [
-        'jetson_1/flir_camera/image_raw/compressed',
-        'jetson_1/bar30/depth',
-        'jetson_1/bar30/pressure',
-        'jetson_1/bar30/temperature',
-        'jetson_1/imagenex831l/range',
-        'jetson_1/imu/data',
-        'jetson_1/ekf/status',
-        'jetson_1/imagenex831l/range_raw'
-    ]
-
-    return LaunchDescription(
-        nodes + [
-            ExecuteProcess(
-                cmd=['ros2', 'bag', 'record', '--storage', 'sqlite3', '-o', ct_str] + topics,
-                output='screen'
-            )
-        ]
-    )
+    ])
