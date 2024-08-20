@@ -20,9 +20,10 @@ class Rosbag(Node):
 
         ct = datetime.datetime.now()
         ct_str = ct.strftime("%Y-%m-%d-%H_%M_%S")
+        name = "/ws/data/"+ct_str
         self.writer = rosbag2_py.SequentialWriter()
         storage_options = rosbag2_py._storage.StorageOptions(
-            uri= ct_str,
+            uri= name,
             storage_id='sqlite3')
         converter_options = rosbag2_py._storage.ConverterOptions('', '')
         self.writer.open(storage_options, converter_options)
@@ -151,9 +152,10 @@ class Rosbag(Node):
         if msg.family == "16h5":
             ct = datetime.datetime.now()
             ct_str = ct.strftime("%Y-%m-%d-%H_%M_%S")
+            name = "/ws/data/"+ct_str
             self.writer = rosbag2_py.SequentialWriter()
             storage_options = rosbag2_py._storage.StorageOptions(
-                uri= ct_str,
+                uri= name,
                 storage_id='sqlite3')
             converter_options = rosbag2_py._storage.ConverterOptions('', '')
             self.writer.open(storage_options, converter_options)
