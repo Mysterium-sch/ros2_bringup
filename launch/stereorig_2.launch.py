@@ -177,7 +177,7 @@ def generate_launch_description():
 
     # Return the LaunchDescription
     return LaunchDescription([
-        april_tag,
+        #april_tag,
         included_cam_launch,
         rosbag_node,
         ping1d_node,
