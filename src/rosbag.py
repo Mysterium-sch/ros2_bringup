@@ -159,8 +159,7 @@ class Rosbag(Node):
                 storage_id='sqlite3')
             converter_options = rosbag2_py._storage.ConverterOptions('', '')
             self.writer.open(storage_options, converter_options)
-
-        self.set_topics()
+            self.set_topics()
 
 
 def main(args=None):
