@@ -9,6 +9,7 @@ from std_msgs.msg import Float32
 from microstrain_inertial_msgs.msg import HumanReadableStatus
 import datetime
 import rosbag2_py
+from rclpy.serialization import serialize_message
 
 class Rosbag(Node):
 
