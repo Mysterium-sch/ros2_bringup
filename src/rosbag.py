@@ -8,8 +8,10 @@ from imagenex831l_ros2.msg import RawRange, ProcessedRange
 from std_msgs.msg import Float32
 from microstrain_inertial_msgs.msg import HumanReadableStatus
 import datetime
+import os
 import rosbag2_py
 from rclpy.serialization import serialize_message
+from aruco_msgs.msg import MarkerArray
 
 class Rosbag(Node):
 
@@ -18,6 +20,7 @@ class Rosbag(Node):
         super().__init__('rosbag')
 
         self.namespace = self.get_namespace()
+        self.tag_id = -1
 
         ct = datetime.datetime.now()
         ct_str = ct.strftime("%Y-%m-%d-%H_%M_%S")
@@ -30,8 +33,6 @@ class Rosbag(Node):
         self.writer.open(storage_options, converter_options)
 
         self.set_topics()
-
-        #self.april_tag_sub = self.create_subscription(AprilTagDetectionArray, f'{self.namespace}/detections', self.april_tag_callback, 10)
 
         self.image_sub = self.create_subscription(CompressedImage, f'{self.namespace}/flir_camera/image_raw/compressed', self.image_callback, 10)
 
@@ -48,6 +49,8 @@ class Rosbag(Node):
         self.ekf_sub = self.create_subscription(HumanReadableStatus, f'{self.namespace}/ekf/status', self.ekf_callback, 10)
 
         self.sonar_raw_sub = self.create_subscription(RawRange, f'{self.namespace}/imagenex831l/range_raw', self.sonar_raw_callback, 10)
+
+        self.arcuo_sub = self.create_subscription9=(MarkerArray, f'{self.namespace}/aruco_marker_publisher/markers', self.tag_handle, 10)
 
     def set_topics(self):
 
@@ -146,11 +149,19 @@ class Rosbag(Node):
             f'{self.namespace}/imagenex831l/range_raw',
             serialize_message(msg),
             self.get_clock().now().nanoseconds)
-    
-    def april_tag_callback(self, msg):
-        if msg.family == "36h11":
+        
+    def tag_handle(self, markers_msg):
+        if len(markers_msg.markers) == 0:
+            self.tag_id = -1
+        else:
+            self.tag_id = markers_msg.markers[0].id
+
+        if self.tag_id == 4:
             self.writer.close()
-        if msg.family == "16h5":
+            os.system("ros2 node list | xargs -I {} ros2 node kill {}")
+        if self.tag_id == 3:
+            self.writer.close()
+        if self.tag_id == 2:
             ct = datetime.datetime.now()
             ct_str = ct.strftime("%Y-%m-%d-%H_%M_%S")
             name = "/ws/data/"+ct_str

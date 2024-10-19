@@ -23,15 +23,14 @@ def generate_launch_description():
     ct = datetime.datetime.now()
     ct_str = ct.strftime("%Y-%m-%d-%H_%M_%S")
     num_files = bag_exists(ct_str)
-    if(num_files > 0 and num_files != 0):
-        ct_str = ctr_str + "_" + str(num)
-
+    if num_files > 0:
+        ct_str = ct_str + "_" + str(num)
 
     launch_params_path = os.path.join('/ws/data/config/parms.yaml')
     with open(launch_params_path, 'r') as f:
         launch_params = yaml.safe_load(f)
 
-    pixel_format = launch_params["jetson_2"]['ros_parameters']['pixel_format']
+    #pixel_format = launch_params["jetson_2"]['ros_parameters']['pixel_format']
     camera_type = launch_params["jetson_2"]['ros_parameters']['camera_type']
     device = launch_params["jetson_2"]['ros_parameters']['device']
     serial = launch_params["jetson_2"]['ros_parameters']['serial']
@@ -59,10 +58,14 @@ def generate_launch_description():
     chunk_enable_gain = launch_params["jetson_2"]['ros_parameters']['chunk_enable_gain']
     chunk_selector_timestamp = launch_params["jetson_2"]['ros_parameters']['chunk_selector_timestamp']
     chunk_enable_timestamp = launch_params["jetson_2"]['ros_parameters']['chunk_enable_timestamp']
+    image_rectified = launch_params["jetson_2"]['ros_parameters']['image_rectified']
+    markerSize = launch_params["jetson_2"]['ros_parameters']['markerSize']
+    cam_frame = launch_params["jetson_2"]['ros_parameters']['cam_frame']
+    ref_frame = launch_params["jetson_2"]['ros_parameters']['ref_frame']
     adc_bit_depth = launch_params["jetson_2"]['ros_parameters']['adc_bit_depth']
     namespace = LaunchConfiguration('namespace')
 
- 
+   
     # Paths to various files
     microstrain_launch_file = os.path.join(
         get_package_share_directory('microstrain_inertial_examples'),
@@ -161,12 +164,25 @@ def generate_launch_description():
         ]
     )
 
-    april_tag = Node(
-        package='apriltag_ros',
-        executable='apriltag_node',
-        namespace=namespace,
-        arguments=["/flir_camera/image_raw/compressed"]
-    )
+    aruco_ros =  Node(
+            package='aruco_ros',
+            executable='marker_publisher',
+            name='aruco_marker_publisher',
+            respawn=True,
+            output='screen',
+            namespace=namespace,
+            remappings=[
+                ('/camera_info', LaunchConfiguration('jetson_2/flir-camera/camera_info')),
+                ('/image', LaunchConfiguration('jetson_2/flir_camera/image_raw'))
+            ],
+            parameters=[
+                {'image_is_rectified': image_rectified},
+                {'marker_size': markerSize},
+                {'reference_frame': ref_frame},
+                {'camera_frame': cam_frame}
+            ],
+            arguments=[device]
+        )
 
     rosbag_node = Node(
         package='ros2_bringup',
@@ -177,7 +193,7 @@ def generate_launch_description():
 
     # Return the LaunchDescription
     return LaunchDescription([
-        #april_tag,
+        aruco_ros,
         included_cam_launch,
         rosbag_node,
         ping1d_node,
