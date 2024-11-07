@@ -9,9 +9,11 @@ from std_msgs.msg import Float32
 from microstrain_inertial_msgs.msg import HumanReadableStatus
 import datetime
 import os
+import subprocess
 import rosbag2_py
 from rclpy.serialization import serialize_message
 from aruco_msgs.msg import MarkerArray
+from std_msgs.msg import String
 
 class Rosbag(Node):
 
@@ -34,6 +36,10 @@ class Rosbag(Node):
 
         self.set_topics()
 
+        self.publisher_ = self.create_publisher(String, f'{self.namespace}/bag', 10)
+
+        
+
         self.image_sub = self.create_subscription(CompressedImage, f'{self.namespace}/flir_camera/image_raw/compressed', self.image_callback, 10)
 
         self.depth_sub = self.create_subscription(Float32, f'{self.namespace}/bar30/depth', self.depth_callback, 10)
@@ -53,6 +59,9 @@ class Rosbag(Node):
         self.arcuo_sub = self.create_subscription9=(MarkerArray, f'{self.namespace}/aruco_marker_publisher/markers', self.tag_handle, 10)
 
     def set_topics(self):
+        msg = String()
+        msg.data = 'Active'
+        self.publisher_.publish(msg)
 
         topic_info_image = rosbag2_py._storage.TopicMetadata(
             name=f'{self.namespace}/flir_camera/image_raw/compressed',
@@ -158,10 +167,16 @@ class Rosbag(Node):
 
         if self.tag_id == 4:
             self.writer.close()
-            os.system("ros2 node list | xargs -I {} ros2 node kill {}")
+            subprocess.run("for node in $(ros2 node list); do clean_node=${node/#\//} pkill -f $clean_node done", shell=True)
         if self.tag_id == 3:
             self.writer.close()
+            msg = String()
+            msg.data = 'Note Active'
+            self.publisher_.publish(msg)
         if self.tag_id == 2:
+            msg = String()
+            msg.data = 'Active'
+            self.publisher_.publish(msg)
             ct = datetime.datetime.now()
             ct_str = ct.strftime("%Y-%m-%d-%H_%M_%S")
             name = "/ws/data/"+ct_str
