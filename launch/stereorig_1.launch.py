@@ -11,11 +11,11 @@ from launch.substitutions import LaunchConfiguration
 
 def bag_exists(time_cap):
     file_path = '/ws/data/'
-    num= 0
+    num = 0
     for dirpath, dirnames, filenames in os.walk(file_path):
         for dirname in dirnames:
             if time_cap in dirname:
-                num = num + 1
+                num += 1
     return num
 
 def generate_launch_description():
@@ -24,56 +24,52 @@ def generate_launch_description():
     ct_str = ct.strftime("%Y-%m-%d-%H_%M_%S")
     num_files = bag_exists(ct_str)
     if num_files > 0:
-        ct_str = ct_str + "_" + str(num)
+        ct_str = f"{ct_str}_{num_files}"
 
     launch_params_path = os.path.join('/ws/data/config/parms.yaml')
     with open(launch_params_path, 'r') as f:
         launch_params = yaml.safe_load(f)
 
-    #pixel_format = launch_params["jetson_1"]['ros_parameters']['pixel_format']
-    camera_type = launch_params["jetson_1"]['ros_parameters']['camera_type']
-    device = launch_params["jetson_1"]['ros_parameters']['device']
-    serial = launch_params["jetson_1"]['ros_parameters']['serial']
-    sonar = launch_params["jetson_1"]['ros_parameters']['sonar']
-    cam_topic = launch_params["jetson_1"]['ros_parameters']['cam_topic']
-    debug = launch_params["jetson_1"]['ros_parameters']['debug']
-    compute_brightness = launch_params["jetson_1"]['ros_parameters']['compute_brightness']
-    adjust_timestamp = launch_params["jetson_1"]['ros_parameters']['adjust_timestamp']
-    dump_node_map = launch_params["jetson_1"]['ros_parameters']['dump_node_map']
-    gain_auto = launch_params["jetson_1"]['ros_parameters']['gain_auto']
-    exposure_auto = launch_params["jetson_1"]['ros_parameters']['exposure_auto']
-    user_set_selector = launch_params["jetson_1"]['ros_parameters']['user_set_selector']
-    user_set_load = launch_params["jetson_1"]['ros_parameters']['user_set_load']
-    frame_rate_auto = launch_params["jetson_1"]['ros_parameters']['frame_rate_auto']
-    frame_rate = launch_params["jetson_1"]['ros_parameters']['frame_rate']
-    frame_rate_enable = launch_params["jetson_1"]['ros_parameters']['frame_rate_enable']
-    buffer_queue_size = launch_params["jetson_1"]['ros_parameters']['buffer_queue_size']
-    trigger_mode = launch_params["jetson_1"]['ros_parameters']['trigger_mode']
-    chunk_mode_active = launch_params["jetson_1"]['ros_parameters']['chunk_mode_active']
-    chunk_selector_frame_id = launch_params["jetson_1"]['ros_parameters']['chunk_selector_frame_id']
-    chunk_enable_frame_id = launch_params["jetson_1"]['ros_parameters']['chunk_enable_frame_id']
-    chunk_selector_exposure_time = launch_params["jetson_1"]['ros_parameters']['chunk_selector_exposure_time']
-    chunk_enable_exposure_time = launch_params["jetson_1"]['ros_parameters']['chunk_enable_exposure_time']
-    chunk_selector_gain = launch_params["jetson_1"]['ros_parameters']['chunk_selector_gain']
-    chunk_enable_gain = launch_params["jetson_1"]['ros_parameters']['chunk_enable_gain']
-    chunk_selector_timestamp = launch_params["jetson_1"]['ros_parameters']['chunk_selector_timestamp']
-    chunk_enable_timestamp = launch_params["jetson_1"]['ros_parameters']['chunk_enable_timestamp']
-    #adc_bit_depth = launch_params["jetson_1"]['ros_parameters']['adc_bit_depth']
+    # Load parameters from YAML
+    jetson_params = launch_params["jetson_1"]['ros_parameters']
+    camera_type = jetson_params['camera_type']
+    device = jetson_params['device']
+    serial = jetson_params['serial']
+    sonar = jetson_params['sonar']
+    cam_topic = jetson_params['cam_topic']
+    debug = jetson_params['debug']
+    compute_brightness = jetson_params['compute_brightness']
+    adjust_timestamp = jetson_params['adjust_timestamp']
+    dump_node_map = jetson_params['dump_node_map']
+    gain_auto = jetson_params['gain_auto']
+    exposure_auto = jetson_params['exposure_auto']
+    user_set_selector = jetson_params['user_set_selector']
+    user_set_load = jetson_params['user_set_load']
+    frame_rate_auto = jetson_params['frame_rate_auto']
+    frame_rate = jetson_params['frame_rate']
+    frame_rate_enable = jetson_params['frame_rate_enable']
+    buffer_queue_size = jetson_params['buffer_queue_size']
+    trigger_mode = jetson_params['trigger_mode']
+    chunk_mode_active = jetson_params['chunk_mode_active']
+    chunk_selector_frame_id = jetson_params['chunk_selector_frame_id']
+    chunk_enable_frame_id = jetson_params['chunk_enable_frame_id']
+    chunk_selector_exposure_time = jetson_params['chunk_selector_exposure_time']
+    chunk_enable_exposure_time = jetson_params['chunk_enable_exposure_time']
+    chunk_selector_gain = jetson_params['chunk_selector_gain']
+    chunk_enable_gain = jetson_params['chunk_enable_gain']
+    chunk_selector_timestamp = jetson_params['chunk_selector_timestamp']
+    chunk_enable_timestamp = jetson_params['chunk_enable_timestamp']
     namespace = LaunchConfiguration('namespace')
 
-   
     # Paths to various files
     microstrain_launch_file = os.path.join(
-        get_package_share_directory('microstrain_inertial_examples'),
-        'launch', 'cv7_launch.py'
+        get_package_share_directory('microstrain_inertial_examples'), 'launch', 'cv7_launch.py'
     )
     cv7_params_file = os.path.join(
-        get_package_share_directory('microstrain_inertial_examples'),
-        'config', 'cv7', 'cv7.yml'
+        get_package_share_directory('microstrain_inertial_examples'), 'config', 'cv7', 'cv7.yml'
     )
     sonar_config = os.path.join(
-        get_package_share_directory('imagenex831l_ros2'),
-        'cfg', 'sonar.yaml'
+        get_package_share_directory('imagenex831l_ros2'), 'cfg', 'sonar.yaml'
     )
     cam_dir = get_package_share_directory('spinnaker_camera_driver')
     sonar_dir = get_package_share_directory('imagenex831l_ros2')
@@ -149,22 +145,31 @@ def generate_launch_description():
             )
         ]
     )
-    
+
     included_screen_launch = GroupAction(
         actions=[
             PushRosNamespace(namespace),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(os.path.join(screen_dir, 'launch', 'gui.launch.py')),
-                launch_arguments={'cam_topic': cam_topic, 'device': device}.items(),
+                launch_arguments={'cam_topic': cam_topic, 'device': device}.items()
             )
         ]
+    )
+
+    apriltag_params_file = os.path.join(
+        get_package_share_directory('apriltag_ros'), 'cfg', 'tags_36h11.yaml'
     )
 
     april_tag = Node(
         package='apriltag_ros',
         executable='apriltag_node',
         namespace=namespace,
-        arguments=["/flir_camera/image_raw/compressed"]
+        remappings=[
+            ('image_rect', '/camera/image'),
+            ('camera_info', '/camera/camera_info')
+        ],
+        parameters=[apriltag_params_file],
+        output='screen'
     )
 
     rosbag_node = Node(
@@ -176,7 +181,6 @@ def generate_launch_description():
 
     # Return the LaunchDescription
     return LaunchDescription([
-        #april_tag,
         included_cam_launch,
         rosbag_node,
         ping1d_node,
