@@ -58,10 +58,6 @@ def generate_launch_description():
     chunk_enable_gain = launch_params["jetson_1"]['ros_parameters']['chunk_enable_gain']
     chunk_selector_timestamp = launch_params["jetson_1"]['ros_parameters']['chunk_selector_timestamp']
     chunk_enable_timestamp = launch_params["jetson_1"]['ros_parameters']['chunk_enable_timestamp']
-    image_rectified = launch_params["jetson_1"]['ros_parameters']['image_rectified']
-    markerSize = launch_params["jetson_1"]['ros_parameters']['markerSize']
-    cam_frame = launch_params["jetson_1"]['ros_parameters']['cam_frame']
-    ref_frame = launch_params["jetson_1"]['ros_parameters']['ref_frame']
     adc_bit_depth = launch_params["jetson_1"]['ros_parameters']['adc_bit_depth']
     namespace = LaunchConfiguration('namespace')
 
@@ -164,26 +160,6 @@ def generate_launch_description():
         ]
     )
 
-    aruco_ros =  Node(
-            package='aruco_ros',
-            executable='marker_publisher',
-            name='aruco_marker_publisher',
-            respawn=True,
-            output='screen',
-            namespace=namespace,
-            remappings=[
-                ('/camera_info', LaunchConfiguration('jetson_1/flir-camera/camera_info')),
-                ('/image', LaunchConfiguration('jetson_1/flir_camera/image_raw'))
-            ],
-            parameters=[
-                {'image_is_rectified': image_rectified},
-                {'marker_size': markerSize},
-                {'reference_frame': ref_frame},
-                {'camera_frame': cam_frame}
-            ],
-            arguments=[device]
-        )
-
     rosbag_node = Node(
         package='ros2_bringup',
         executable='rosbag.py',
@@ -193,7 +169,6 @@ def generate_launch_description():
 
     # Return the LaunchDescription
     return LaunchDescription([
-        aruco_ros,
         included_cam_launch,
         rosbag_node,
         ping1d_node,
