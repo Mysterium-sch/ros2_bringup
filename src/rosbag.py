@@ -114,7 +114,7 @@ class Rosbag(Node):
 
     def image_callback(self, msg):
         msg = String()
-        msg.data = bag_status
+        msg.data = self.bag_status
         self.publisher_.publish(msg)
         
         self.writer.write(
@@ -187,7 +187,7 @@ class Rosbag(Node):
             self.writer.close()
             self.bag_status = 'Not Active'
         elif tag_id == 2:
-            bag_status = "Active"
+            self.bag_status = "Active"
             self.start_new_bag_recording()
 
     def start_new_bag_recording(self):
