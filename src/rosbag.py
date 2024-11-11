@@ -29,6 +29,7 @@ class Rosbag(Node):
 
         self.namespace = self.get_namespace()
         self.tag_id = -1
+        self.bag_status = "Active"
 
         ct = datetime.datetime.now()
         ct_str = ct.strftime("%Y-%m-%d-%H_%M_%S")
@@ -62,9 +63,6 @@ class Rosbag(Node):
 
 
     def set_topics(self):
-        msg = String()
-        msg.data = 'Active'
-        self.publisher_.publish(msg)
 
         topic_info_image = rosbag2_py._storage.TopicMetadata(
             name=f'{self.namespace}/flir_camera/image_raw/compressed',
@@ -115,6 +113,10 @@ class Rosbag(Node):
         self.writer.create_topic(topic_info_sonar_raw)
 
     def image_callback(self, msg):
+        msg = String()
+        msg.data = bag_status
+        self.publisher_.publish(msg)
+        
         self.writer.write(
             f'{self.namespace}/flir_camera/image_raw/compressed',
             serialize_message(msg),
