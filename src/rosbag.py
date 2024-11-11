@@ -184,7 +184,7 @@ class Rosbag(Node):
         elif tag_id == 3:
             self.writer.close()
             msg = String()
-            msg.data = 'Note Active'
+            msg.data = 'Not Active'
             self.publisher_.publish(msg)
         elif tag_id == 2:
             msg = String()
