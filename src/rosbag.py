@@ -185,13 +185,9 @@ class Rosbag(Node):
             subprocess.run("for node in $(ros2 node list); do clean_node=${node/#\//} pkill -f $clean_node done", shell=True)
         elif tag_id == 3:
             self.writer.close()
-            msg = String()
-            msg.data = 'Not Active'
-            self.publisher_.publish(msg)
+            self.bag_status = 'Not Active'
         elif tag_id == 2:
-            msg = String()
-            msg.data = 'Active'
-            self.publisher_.publish(msg)
+            bag_status = "Active"
             self.start_new_bag_recording()
 
     def start_new_bag_recording(self):
