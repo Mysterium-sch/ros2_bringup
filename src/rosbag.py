@@ -7,7 +7,6 @@ from apriltag_msgs.msg import AprilTagDetectionArray
 from imagenex831l_ros2.msg import RawRange, ProcessedRange
 from std_msgs.msg import Float32
 from microstrain_inertial_msgs.msg import HumanReadableStatus
-from rosbag.tag_detection import create_tag_detector, TagStateMachine
 import datetime
 from cv_bridge import CvBridge
 import os
