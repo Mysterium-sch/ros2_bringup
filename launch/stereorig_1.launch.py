@@ -78,6 +78,7 @@ def generate_launch_description():
     cam_dir = get_package_share_directory('spinnaker_camera_driver')
     sonar_dir = get_package_share_directory('imagenex831l_ros2')
     screen_dir = get_package_share_directory('custom_guyi')
+    tag_dir = get_package_share_directory('apriltag_ros')
 
     # Group actions and nodes
     included_cam_launch = GroupAction(
@@ -160,6 +161,16 @@ def generate_launch_description():
         ]
     )
 
+    included_tag_launch = GroupAction(
+        actions=[
+            PushRosNamespace(namespace),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(os.path.join(tag_dir, 'apriltag_ros', 'launch', 'tag_gazebo.launch.py')),
+                launch_arguments={'image_topic': cam_topic, 'camera_name': '/camera/color'}.items(),
+            )
+        ]
+    )
+
     rosbag_node = Node(
         package='ros2_bringup',
         executable='rosbag.py',
@@ -169,6 +180,7 @@ def generate_launch_description():
 
     # Return the LaunchDescription
     return LaunchDescription([
+        included_tag_launch,
         included_cam_launch,
         rosbag_node,
         ping1d_node,
