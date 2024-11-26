@@ -165,7 +165,7 @@ def generate_launch_description():
         actions=[
             PushRosNamespace(namespace),
             IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(os.path.join(tag_dir, 'apriltag_ros', 'launch', 'tag_gazebo.launch.py')),
+                PythonLaunchDescriptionSource(os.path.join(tag_dir, 'launch', 'tag_gazebo.launch.py')),
                 launch_arguments={'image_topic': cam_topic, 'camera_name': '/camera/color'}.items(),
             )
         ]
