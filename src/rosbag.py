@@ -13,7 +13,6 @@ import os
 import subprocess
 import rosbag2_py
 from rclpy.serialization import serialize_message
-from aruco_msgs.msg import MarkerArray
 from std_msgs.msg import String
 
 class Rosbag(Node):
@@ -22,9 +21,6 @@ class Rosbag(Node):
 
         super().__init__('rosbag')
         self._cv_br = CvBridge()
-
-        self.tag_detector, self.clear_history = create_tag_detector(hist_size=20)
-        self.state_machine = TagStateMachine()
 
         self.namespace = self.get_namespace()
         self.tag_id = -1
