@@ -8,23 +8,16 @@ from imagenex831l_ros2.msg import RawRange, ProcessedRange
 from std_msgs.msg import Float32
 from microstrain_inertial_msgs.msg import HumanReadableStatus
 import datetime
-from cv_bridge import CvBridge
-import os
-import subprocess
 import rosbag2_py
 from rclpy.serialization import serialize_message
-from std_msgs.msg import String
 
 class Rosbag(Node):
 
     def __init__(self):
 
         super().__init__('rosbag')
-        self._cv_br = CvBridge()
 
         self.namespace = self.get_namespace()
-        self.tag_id = -1
-        self.bag_status = "Active"
 
         ct = datetime.datetime.now()
         ct_str = ct.strftime("%Y-%m-%d-%H_%M_%S")
@@ -38,7 +31,7 @@ class Rosbag(Node):
 
         self.set_topics()
 
-        self.publisher_ = self.create_publisher(String, f'{self.namespace}/bag', 10)
+        #self.april_tag_sub = self.create_subscription(AprilTagDetectionArray, f'{self.namespace}/detections', self.april_tag_callback, 10)
 
         self.image_sub = self.create_subscription(CompressedImage, f'{self.namespace}/flir_camera/image_raw/compressed', self.image_callback, 10)
 
@@ -55,7 +48,6 @@ class Rosbag(Node):
         self.ekf_sub = self.create_subscription(HumanReadableStatus, f'{self.namespace}/ekf/status', self.ekf_callback, 10)
 
         self.sonar_raw_sub = self.create_subscription(RawRange, f'{self.namespace}/imagenex831l/range_raw', self.sonar_raw_callback, 10)
-
 
     def set_topics(self):
 
@@ -108,15 +100,10 @@ class Rosbag(Node):
         self.writer.create_topic(topic_info_sonar_raw)
 
     def image_callback(self, msg):
-        msg = String()
-        msg.data = self.bag_status
-        self.publisher_.publish(msg)
-        
         self.writer.write(
             f'{self.namespace}/flir_camera/image_raw/compressed',
             serialize_message(msg),
             self.get_clock().now().nanoseconds)
-        self.tag_handle(msg)
 
     def depth_callback(self, msg):
         self.writer.write(
@@ -159,44 +146,21 @@ class Rosbag(Node):
             f'{self.namespace}/imagenex831l/range_raw',
             serialize_message(msg),
             self.get_clock().now().nanoseconds)
-        
-    def tag_handle(self, image):
-        img = self._cv_br.compressed_imgmsg_to_cv2(image, 'rgb8')
-        tag_id, tag_progress = self.tag_detector(img)
-        
-        self.state_machine.update(tag_id=tag_id, tag_progress=tag_progress)
-
-        if self.state_machine.is_new_tag_detected:
-            self.current_tag_id = tag_id
-            self.handle_new_tag(tag_id)
-
-        elif self.state_machine.is_detected_tag_used:
-            self.clear_history()
-            self.state_machine.consume_tag(tag_id=tag_id, tag_progress=tag_progress)
-        
-    def handle_new_tag(self, tag_id):
-        if tag_id == 4:
+    
+    def april_tag_callback(self, msg):
+        if msg.family == "36h11":
             self.writer.close()
-            subprocess.run("for node in $(ros2 node list); do clean_node=${node/#\//} pkill -f $clean_node done", shell=True)
-        elif tag_id == 3:
-            self.writer.close()
-            self.bag_status = 'Not Active'
-        elif tag_id == 2:
-            self.bag_status = "Active"
-            self.start_new_bag_recording()
-
-    def start_new_bag_recording(self):
-        ct = datetime.datetime.now()
-        ct_str = ct.strftime("%Y-%m-%d-%H_%M_%S")
-        name = "/ws/data/" + ct_str
-        self.writer = rosbag2_py.SequentialWriter()
-        storage_options = rosbag2_py._storage.StorageOptions(
-            uri=name,
-            storage_id='sqlite3')
-        converter_options = rosbag2_py._storage.ConverterOptions('', '')
-        self.writer.open(storage_options, converter_options)
-        self.set_topics()
-
+        if msg.family == "16h5":
+            ct = datetime.datetime.now()
+            ct_str = ct.strftime("%Y-%m-%d-%H_%M_%S")
+            name = "/ws/data/"+ct_str
+            self.writer = rosbag2_py.SequentialWriter()
+            storage_options = rosbag2_py._storage.StorageOptions(
+                uri= name,
+                storage_id='sqlite3')
+            converter_options = rosbag2_py._storage.ConverterOptions('', '')
+            self.writer.open(storage_options, converter_options)
+            self.set_topics()
 
 
 def main(args=None):
