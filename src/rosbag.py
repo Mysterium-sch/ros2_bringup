@@ -5,7 +5,7 @@ from rclpy.node import Node
 from sensor_msgs.msg import Imu, CompressedImage
 from apriltag_msgs.msg import AprilTagDetectionArray
 from imagenex831l_ros2.msg import RawRange, ProcessedRange
-from std_msgs.msg import Float32
+from std_msgs.msg import Float32, String
 from microstrain_inertial_msgs.msg import HumanReadableStatus
 import datetime
 import rosbag2_py
@@ -19,6 +19,8 @@ class Rosbag(Node):
         super().__init__('rosbag')
 
         self.namespace = self.get_namespace()
+
+        self.bag_status = "Not Active"
 
         ct = datetime.datetime.now()
         ct_str = ct.strftime("%Y-%m-%d-%H_%M_%S")
@@ -52,7 +54,19 @@ class Rosbag(Node):
 
         self.tag_sub = self.create_subscription(int, f'/tag_id', self.tag_callback, 10)
 
+        self.bag_pub = self.create_publisher(String, "bag", 10)
+
+        self.timer = self.create_timer(1.0, self.publish_tag_id)
+
+    def publish_tag_id(self):
+        msg = String()
+        msg.data = self.bag_status
+        self.bag_pub.publish(msg)
+        self.get_logger().info(f"Published: {msg.data}")
+
     def set_topics(self):
+
+        self.bag_status = "Active"
 
         topic_info_image = rosbag2_py._storage.TopicMetadata(
             name=f'{self.namespace}/flir_camera/image_raw/compressed',
@@ -151,15 +165,16 @@ class Rosbag(Node):
             self.get_clock().now().nanoseconds)
     
     def tag_callback(self, msg):
-        tag_id = msg.data  # Extract the tag ID
-        if tag_id == 1:  # Close the rosbag
+        tag_id = msg.data  
+        if tag_id == 1:  
             if self.writer:
                 self.get_logger().info("Closing rosbag due to tag ID 1.")
                 self.writer.close()
+                self.bag_status = "Not Active"
                 self.writer = None
             else:
                 self.get_logger().info("No rosbag is currently running.")
-        elif tag_id == 2:  # Start a new rosbag if none is running
+        elif tag_id == 2:
             if self.writer is None:
                 self.get_logger().info("Starting a new rosbag due to tag ID 2.")
                 ct = datetime.datetime.now()
