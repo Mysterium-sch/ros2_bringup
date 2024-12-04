@@ -58,10 +58,6 @@ def generate_launch_description():
     chunk_enable_gain = launch_params["jetson_2"]['ros_parameters']['chunk_enable_gain']
     chunk_selector_timestamp = launch_params["jetson_2"]['ros_parameters']['chunk_selector_timestamp']
     chunk_enable_timestamp = launch_params["jetson_2"]['ros_parameters']['chunk_enable_timestamp']
-    image_rectified = launch_params["jetson_2"]['ros_parameters']['image_rectified']
-    markerSize = launch_params["jetson_2"]['ros_parameters']['markerSize']
-    cam_frame = launch_params["jetson_2"]['ros_parameters']['cam_frame']
-    ref_frame = launch_params["jetson_2"]['ros_parameters']['ref_frame']
     adc_bit_depth = launch_params["jetson_2"]['ros_parameters']['adc_bit_depth']
     namespace = LaunchConfiguration('namespace')
 
@@ -82,6 +78,7 @@ def generate_launch_description():
     cam_dir = get_package_share_directory('spinnaker_camera_driver')
     sonar_dir = get_package_share_directory('imagenex831l_ros2')
     screen_dir = get_package_share_directory('custom_guyi')
+    tag_dir = get_package_share_directory('apriltag_ros')
 
     # Group actions and nodes
     included_cam_launch = GroupAction(
@@ -164,25 +161,15 @@ def generate_launch_description():
         ]
     )
 
-    aruco_ros =  Node(
-            package='aruco_ros',
-            executable='marker_publisher',
-            name='aruco_marker_publisher',
-            respawn=True,
-            output='screen',
-            namespace=namespace,
-            remappings=[
-                ('/camera_info', LaunchConfiguration('jetson_2/flir-camera/camera_info')),
-                ('/image', LaunchConfiguration('jetson_2/flir_camera/image_raw'))
-            ],
-            parameters=[
-                {'image_is_rectified': image_rectified},
-                {'marker_size': markerSize},
-                {'reference_frame': ref_frame},
-                {'camera_frame': cam_frame}
-            ],
-            arguments=[device]
-        )
+    included_tag_launch = GroupAction(
+        actions=[
+            PushRosNamespace(namespace),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(os.path.join(tag_dir, 'launch', 'tag_gazebo.launch.py')),
+                launch_arguments={'image_topic': cam_topic, 'camera_name': '/camera/color'}.items(),
+            )
+        ]
+    )
 
     rosbag_node = Node(
         package='ros2_bringup',
@@ -193,7 +180,7 @@ def generate_launch_description():
 
     # Return the LaunchDescription
     return LaunchDescription([
-        aruco_ros,
+        included_tag_launch,
         included_cam_launch,
         rosbag_node,
         ping1d_node,
