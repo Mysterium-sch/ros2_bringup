@@ -3,9 +3,8 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Imu, CompressedImage
-from apriltag_msgs.msg import AprilTagDetectionArray
 from imagenex831l_ros2.msg import RawRange, ProcessedRange
-from std_msgs.msg import Float32, String
+from std_msgs.msg import Float32, String, Int32
 from microstrain_inertial_msgs.msg import HumanReadableStatus
 import datetime
 import rosbag2_py
@@ -34,8 +33,6 @@ class Rosbag(Node):
 
         self.set_topics()
 
-        #self.april_tag_sub = self.create_subscription(AprilTagDetectionArray, f'{self.namespace}/detections', self.april_tag_callback, 10)
-
         self.image_sub = self.create_subscription(CompressedImage, f'{self.namespace}/flir_camera/image_raw/compressed', self.image_callback, 10)
 
         self.depth_sub = self.create_subscription(Float32, f'{self.namespace}/bar30/depth', self.depth_callback, 10)
@@ -52,7 +49,7 @@ class Rosbag(Node):
 
         self.sonar_raw_sub = self.create_subscription(RawRange, f'{self.namespace}/imagenex831l/range_raw', self.sonar_raw_callback, 10)
 
-        self.tag_sub = self.create_subscription(int, f'/tag_id', self.tag_callback, 10)
+        self.tag_sub = self.create_subscription(Int32, f'/tag_id', self.tag_callback, 10)
 
         self.bag_pub = self.create_publisher(String, "bag", 10)
 
