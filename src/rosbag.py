@@ -49,7 +49,7 @@ class Rosbag(Node):
 
         self.sonar_raw_sub = self.create_subscription(RawRange, f'{self.namespace}/imagenex831l/range_raw', self.sonar_raw_callback, 10)
 
-        self.tag_sub = self.create_subscription(Int32, f'/tag_id', self.tag_callback, 10)
+        self.tag_sub = self.create_subscription(Int32, f'{self.namespace}/tag_id', self.tag_callback, 10)
 
         self.bag_pub = self.create_publisher(String, "bag", 10)
 
