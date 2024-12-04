@@ -113,6 +113,7 @@ class Rosbag(Node):
         self.writer.create_topic(topic_info_sonar_raw)
 
     def image_callback(self, msg):
+        self.publish_bag()
         self.writer.write(
             f'{self.namespace}/flir_camera/image_raw/compressed',
             serialize_message(msg),
@@ -187,8 +188,6 @@ class Rosbag(Node):
                 self.set_topics()
             else:
                 self.get_logger().info("A rosbag is already running.")
-        
-        self.publish_bag()
 
 
 
