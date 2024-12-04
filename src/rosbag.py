@@ -53,9 +53,8 @@ class Rosbag(Node):
 
         self.bag_pub = self.create_publisher(String, "bag", 10)
 
-        self.timer = self.create_timer(1.0, self.publish_tag_id)
 
-    def publish_tag_id(self):
+    def publish_bag(self):
         msg = String()
         msg.data = self.bag_status
         self.bag_pub.publish(msg)
@@ -162,6 +161,7 @@ class Rosbag(Node):
             self.get_clock().now().nanoseconds)
     
     def tag_callback(self, msg):
+        
         tag_id = msg.data  
         if tag_id == 1:  
             if self.writer:
@@ -187,7 +187,8 @@ class Rosbag(Node):
                 self.set_topics()
             else:
                 self.get_logger().info("A rosbag is already running.")
-
+        
+        self.publish_bag()
 
 
 
