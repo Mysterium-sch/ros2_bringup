@@ -10,6 +10,7 @@ from microstrain_inertial_msgs.msg import HumanReadableStatus
 import datetime
 import rosbag2_py
 from rclpy.serialization import serialize_message
+from example_interfaces.srv import Trigger
 
 class Rosbag(Node):
 
@@ -48,6 +49,8 @@ class Rosbag(Node):
         self.ekf_sub = self.create_subscription(HumanReadableStatus, f'{self.namespace}/ekf/status', self.ekf_callback, 10)
 
         self.sonar_raw_sub = self.create_subscription(RawRange, f'{self.namespace}/imagenex831l/range_raw', self.sonar_raw_callback, 10)
+
+        self.tag_sub = self.create_subscription(int, f'/tag_id', self.tag_callback, 10)
 
     def set_topics(self):
 
@@ -147,20 +150,34 @@ class Rosbag(Node):
             serialize_message(msg),
             self.get_clock().now().nanoseconds)
     
-    def april_tag_callback(self, msg):
-        if msg.family == "36h11":
-            self.writer.close()
-        if msg.family == "16h5":
-            ct = datetime.datetime.now()
-            ct_str = ct.strftime("%Y-%m-%d-%H_%M_%S")
-            name = "/ws/data/"+ct_str
-            self.writer = rosbag2_py.SequentialWriter()
-            storage_options = rosbag2_py._storage.StorageOptions(
-                uri= name,
-                storage_id='sqlite3')
-            converter_options = rosbag2_py._storage.ConverterOptions('', '')
-            self.writer.open(storage_options, converter_options)
-            self.set_topics()
+    def tag_callback(self, msg):
+        tag_id = msg.data  # Extract the tag ID
+        if tag_id == 1:  # Close the rosbag
+            if self.writer:
+                self.get_logger().info("Closing rosbag due to tag ID 1.")
+                self.writer.close()
+                self.writer = None
+            else:
+                self.get_logger().info("No rosbag is currently running.")
+        elif tag_id == 2:  # Start a new rosbag if none is running
+            if self.writer is None:
+                self.get_logger().info("Starting a new rosbag due to tag ID 2.")
+                ct = datetime.datetime.now()
+                ct_str = ct.strftime("%Y-%m-%d-%H_%M_%S")
+                name = "/ws/data/" + ct_str
+                self.writer = rosbag2_py.SequentialWriter()
+                storage_options = rosbag2_py._storage.StorageOptions(
+                    uri=name,
+                    storage_id='sqlite3'
+                )
+                converter_options = rosbag2_py._storage.ConverterOptions('', '')
+                self.writer.open(storage_options, converter_options)
+                self.set_topics()
+            else:
+                self.get_logger().info("A rosbag is already running.")
+
+
+
 
 
 def main(args=None):
