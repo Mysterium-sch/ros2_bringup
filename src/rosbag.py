@@ -58,7 +58,6 @@ class Rosbag(Node):
         msg = String()
         msg.data = self.bag_status
         self.bag_pub.publish(msg)
-        self.get_logger().info(f"Published: {msg.data}")
 
     def set_topics(self):
 
