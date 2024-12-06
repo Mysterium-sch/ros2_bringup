@@ -74,6 +74,7 @@ def generate_launch_description():
     cam_dir = get_package_share_directory('spinnaker_camera_driver')
     sonar_dir = get_package_share_directory('imagenex831l_ros2')
     screen_dir = get_package_share_directory('custom_guyi')
+    aruco_dir = get_package_share_directory('ros2_aruco')
 
     # Group actions and nodes
     included_cam_launch = GroupAction(
@@ -160,8 +161,13 @@ def generate_launch_description():
         get_package_share_directory('apriltag_ros'), 'cfg', 'tags_36h11.yaml'
     )
 
-    april_tag = Node(
-        package='apriltag_ros',
+    aruco_tag = GroupAction(
+        action=[
+            PushRosNamespace(namespace),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(os.path.join(aruco_dir, 'launch', 'aruco_recognition.launch.py')),
+                
+        package='ros2_aruco',
         executable='apriltag_node',
         namespace=namespace,
         remappings=[
