@@ -24,7 +24,7 @@ def generate_launch_description():
     ct_str = ct.strftime("%Y-%m-%d-%H_%M_%S")
     num_files = bag_exists(ct_str)
     if num_files > 0:
-        ct_str = ct_str + "_" + str(num)
+        ct_str = ct_str + "_" + str(num_files)
 
     launch_params_path = os.path.join('/ws/data/config/parms.yaml')
     with open(launch_params_path, 'r') as f:
@@ -58,7 +58,7 @@ def generate_launch_description():
     chunk_enable_gain = launch_params["jetson_1"]['ros_parameters']['chunk_enable_gain']
     chunk_selector_timestamp = launch_params["jetson_1"]['ros_parameters']['chunk_selector_timestamp']
     chunk_enable_timestamp = launch_params["jetson_1"]['ros_parameters']['chunk_enable_timestamp']
-    adc_bit_depth = launch_params["jetson_1"]['ros_parameters']['adc_bit_depth']
+    #adc_bit_depth = launch_params["jetson_1"]['ros_parameters']['adc_bit_depth']
     namespace = LaunchConfiguration('namespace')
 
    
