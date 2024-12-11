@@ -52,7 +52,7 @@ class Rosbag(Node):
 
         self.tag_sub = self.create_subscription(Int32, f'jetson_1/tag_id', self.tag_callback, 10)
 
-        self.bag_pub = self.create_publisher(String, "bag", 10)
+        self.bag_pub = self.create_publisher(String, f'{self.device}/bag', 10)
 
 
     def publish_bag(self):
