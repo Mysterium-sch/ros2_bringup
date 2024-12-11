@@ -161,25 +161,14 @@ def generate_launch_description():
         ]
     )
 
-    included_tag_launch = GroupAction(
-        actions=[
-            PushRosNamespace(namespace),
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(os.path.join(tag_dir, 'launch', 'aruco_recognition.launch.py')),
-                launch_arguments={'image_topic': cam_topic, 'aruco_dictionary_id': 'DICT_ARUCO_ORIGINAL', 'camera_info_topic': '/image_raw/camera_info'}.items(),
-            )
-        ]
-    )
-
     rosbag_node = Node(
         package='ros2_bringup',
         executable='rosbag.py',
         parameters=[{'device': device}]
     )
-    
+
     # Return the LaunchDescription
     return LaunchDescription([
-        included_tag_launch,
         included_cam_launch,
         rosbag_node,
         ping1d_node,
